@@ -7,3 +7,4 @@ class Filter:
         pass
     def apply_to(self,image:np.ndarray) -> np.ndarray:
         return image
+
