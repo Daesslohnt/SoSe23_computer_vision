@@ -9,7 +9,7 @@ class AbsDiffFilter(Filter):
         super().__init__()
         self.last_image = None
 
-    def apply_to(self,image:np.ndarray) -> np.ndarray:
+    def apply_to(self, image: np.ndarray) -> np.ndarray:
         old_image = self.last_image
         if not type(old_image) is np.ndarray:
             old_image = image
