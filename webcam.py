@@ -2,7 +2,8 @@ import time
 
 from cv2.cv2 import *
 
-from Filter import Filter
+from Filter import filter
+from Filter.filter import Filter
 
 
 class Webcam:
@@ -40,7 +41,7 @@ class Webcam:
     @staticmethod
     def _apply_pipeline(image, pipeline: [Filter]):
         for filter_instance in pipeline:
-            filter_instance.apply_to(image)
+            image = filter_instance.apply_to(image)
 
         return image
 
