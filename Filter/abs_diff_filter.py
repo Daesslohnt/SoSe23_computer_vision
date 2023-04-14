@@ -5,6 +5,9 @@ from Filter.filter import Filter
 
 
 class AbsDiffFilter(Filter):
+    '''
+    Calculates the difference of the last and current supplied images.
+    '''
     def __init__(self):
         super().__init__()
         self.last_image = None

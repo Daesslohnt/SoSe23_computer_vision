@@ -5,6 +5,10 @@ from Filter.filter import Filter
 
 
 class AdditionFilter(Filter):
+    '''
+    Combines the supplied and the last processed image using weights. The default weights are (0.5,0.5)
+    '''
+
     def __init__(self, weights: (int, int) = (0.5, 0.5)):
         super().__init__()
         self.last_image = None
