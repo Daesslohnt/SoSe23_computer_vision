@@ -1,71 +1,35 @@
-# program to capture single image from webcam in python
-import sys
+import os.path
 import time
-from time import *
 
-import numpy
-import numpy as np
-# importing OpenCV
+from cv2 import cv2
 
-from cv2.cv2 import *
+from Filter.abs_diff_filter import AbsDiffFilter
+from Filter.addition_filter import AdditionFilter
+from Filter.blur_filter import BlurFilter
+from Filter.dilate_filter import DilateFilter
+from Filter.filter import *
+from Filter.grey_filter import GreyFilter
+from Filter.threshold_filter import ThresholdFilter
+from webcam import Webcam
 
-if __name__ == "__main__":
+cam = Webcam()
+cam.add_pipeline("Filter", [GreyFilter(), BlurFilter(), AbsDiffFilter(), ThresholdFilter(), DilateFilter(np.ones(1)),
+                            AdditionFilter((0.5, 1.0))])
+path = os.path.abspath("/home/benedikts/PycharmProjects/computervisionss23/Hello.png")
+old_time = 0
 
-    # initialize the camera
-    # If you have multiple camera connected with
-    # current device, assign a value in cam_port
-    # variable according to that
-    cam_port = 0
-    cam = VideoCapture(cam_port)
+while True:
 
-    act0 = 0
-    act1 = 0
+    image = cam.get_image()
+    image2 = cam.get_image("Filter")
 
-    image0 = cvtColor(cam.read()[1], COLOR_BGR2GRAY)
-    old_image = image = image0
-    height = len(image0)
-    width = len(image0[0])
+    cv2.imshow("Webcam", image)
+    cv2.imshow("Filter", image2)
 
-    while True:
-        # reading the input using the camera
-        im_rgb = cam.read()[1]
-        image1 = cvtColor(im_rgb, COLOR_BGR2GRAY)
+    if cv2.waitKey(1) == ord('q'):
+        break
 
-        # image = GaussianBlur(image, (0, 0), sigmaX=2, sigmaY=2)
-        image1 = GaussianBlur(image1, (0, 0), sigmaX=5, sigmaY=5)
-
-        image = absdiff(image1, image0)
-
-        # image = GaussianBlur(image, (0, 0), sigmaX=15, sigmaY=15)
-
-        kernel = np.ones((5, 5))
-        image = dilate(image, kernel, 1)
-        image = threshold(src=image, thresh=10, maxval=255, type=THRESH_BINARY)[1]
-        # contours,  = findContours(image=image, mode=RETR_EXTERNAL, method=CHAIN_APPROX_SIMPLE)
-
-        # drawContours(image=im_rgb, contours=contours, contourIdx=-1, color=(0, 255, 0), thickness=2, lineType=LINE_AA)
-
-        image0 = image1
-
-        # image = Canny(image, 100, 200, None, 3, False)
-
-        addWeighted(old_image, 0.7, image, 1.0, 0.0, image)
-
-        imshow("GeeksForGeeks", image)
-        old_image = image
-        imshow("rgb", im_rgb)
-        # print(len(image[0]))
-        # saving image in local storage
-        # imwrite("GeeksForGeeks.png", image)
-1
-        # If keyboard interrupt occurs, destroy image
-        # window
-        act1 = perf_counter()
-        print(act1 - act0)
-        act0 = act1
-        waitKey(1)
-
-        # if cv2.waitKey(1) == ord('q'):
-        #     break
-
-        # destroyWindow("GeeksForGeeks")
+    new_time = time.perf_counter()
+    res = time.perf_counter() - old_time
+    old_time = new_time
+    print(res)
