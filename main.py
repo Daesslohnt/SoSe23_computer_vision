@@ -14,7 +14,7 @@ from webcam import Webcam
 
 cam = Webcam()
 cam.add_pipeline("Filter", [GreyFilter(), BlurFilter(), AbsDiffFilter(), ThresholdFilter(), DilateFilter(np.ones(1)),
-                            AdditionFilter((0.5, 1.0))])
+                            AdditionFilter((0.9, 1.0))])
 path = os.path.abspath("/home/benedikts/PycharmProjects/computervisionss23/Hello.png")
 old_time = 0
 

@@ -1,6 +1,9 @@
+import time
+
 import cv2
 import mediapipe as mp
 from pynput import mouse
+from pynput.mouse import Button
 
 from rectangle import Rectangle
 
@@ -12,6 +15,10 @@ if __name__ == "__main__":
 
     mouse = mouse.Controller()
     pfinal = [0, 0]
+    old_pos = (0, 0)
+    movement = (0, 0)
+    last_perf_time_mouse = 0
+    last_perf_time_scroll = 0
 
     # For webcam input:
     cap = cv2.VideoCapture(0)
@@ -51,12 +58,25 @@ if __name__ == "__main__":
                         ring = Rectangle([(landmark[i].x, landmark[i].y) for i in range(14, 17)], [640, 480])
                         pinkie = Rectangle([(landmark[i].x, landmark[i].y) for i in range(18, 21)], [640, 480])
 
+                        thumb_extended = not palm.collides(thumb)
+                        index_extended = not palm.collides_y(index)
+                        middle_extended = not palm.collides_y(middle)
+                        ring_extended = not palm.collides_y(ring)
+                        pinkie_extended = not palm.collides_y(pinkie)
+
                         draw(palm)
                         draw(thumb)
                         draw(index)
                         draw(middle)
                         draw(ring)
                         draw(pinkie)
+
+                        #alternative way
+                        thumb_extended = landmark[2].x > landmark[4].x
+                        index_extended = landmark[6].y > landmark[8].y
+                        middle_extended = landmark[10].y > landmark[12].y
+                        ring_extended = landmark[14].y > landmark[16].y
+                        pinkie_extended = landmark[18].y > landmark[20].y
 
                         # Calculate average position of wrist,thumb and pinkie
                         x = (landmark[0].x + landmark[4].x + landmark[20].x) / 3
@@ -65,11 +85,81 @@ if __name__ == "__main__":
 
                         image = cv2.circle(img=image, center=circle_center, radius=20, color=(255, 0, 0), thickness=3)
 
+                        tp = 0.9
+                        if pinkie_extended:
+                            if thumb_extended:
+                                # mouse movement
+
+                                # time since last movement
+                                perf_time = time.perf_counter()
+                                mouse_frametime = perf_time - last_perf_time_mouse
+                                print("move:",mouse_frametime)
+                                last_perf_time_mouse = perf_time
+
+                                # move mouse
+                                x *= 640
+                                y *= 480
+
+                                if mouse_frametime > 0.1:
+                                    old_pos = (x, y)
+
+                                fact = 2
+                                movement = (movement[0] * (1 - tp) + (x - old_pos[0]) * tp) * fact, \
+                                    (movement[1] * (1 - tp) + (y - old_pos[1]) * tp) * fact
+                                old_pos = (x, y)
+
+                                mouse.move(movement[0], movement[1])
+                            else:
+                                # mouse scrolling
+
+                                # time since last movement
+                                perf_time = time.perf_counter()
+                                scroll_frametime = perf_time - last_perf_time_scroll
+                                print("scro:" ,scroll_frametime)
+                                last_perf_time_scroll = perf_time
+
+
+                                # scroll
+                                x *= 640
+                                y *= 480
+
+                                if scroll_frametime > 0.1:
+                                    old_pos = (x, y)
+
+                                fact = 2
+                                movement = (movement[0] * (1 - tp) + (x - old_pos[0]) * tp) * fact, \
+                                    (movement[1] * (1 - tp) + (y - old_pos[1]) * tp) * fact
+                                old_pos = (x, y)
+
+                                scroll_up = movement[1] > 0
+
+                                mouse.scroll(0,- movement[1])
+
+
+
+
+                            # mouse button left
+                            if not index_extended:
+                                mouse.press(Button.left)
+                            else:
+                                mouse.release(Button.left)
+
+                            #mouse button right
+                            if not middle_extended:
+                                mouse.press(Button.right)
+                            else:
+                                mouse.release(Button.right)
+
+                        # mouse button middle
+                        if not ring_extended:
+                            mouse.press(Button.middle)
+                        else:
+                            mouse.release(Button.middle)
+
                         # depth pass
-                        tp = 0.3
                         pfinal[0] = int(pfinal[0] * (1 - tp) + circle_center[0] * tp)
                         pfinal[1] = int(pfinal[1] * (1 - tp) + circle_center[1] * tp)
-                        mouse.position = [int((pfinal[0] - 20) * 3.5), int((pfinal[1] - 20) * 3)]
+                        # mouse.position = [int((pfinal[0] - 20) * 3.5), int((pfinal[1] - 20) * 3)]
 
                 # print landmarks to screen
                 for hand_landmarks in results.multi_hand_landmarks:

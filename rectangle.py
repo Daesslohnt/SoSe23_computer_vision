@@ -17,3 +17,21 @@ class Rectangle:
 
     def get_bounding_box(self):
         return [(self.x1, self.y1), (self.x2, self.y2)]
+
+    def collides(self, other):
+        self_bound = self.get_bounding_box()
+        other_bound = other.get_bounding_box()
+
+        return \
+                self_bound[0][0] < other_bound[1][0] and \
+                self_bound[0][1] < other_bound[1][1] and \
+                self_bound[1][0] > other_bound[0][0] and \
+                self_bound[1][1] > other_bound[0][1]
+
+    def collides_y(self, other):
+        self_bound = self.get_bounding_box()
+        other_bound = other.get_bounding_box()
+
+        return \
+                self_bound[0][1] < other_bound[1][1] and \
+                self_bound[1][1] > other_bound[0][1]
