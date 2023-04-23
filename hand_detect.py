@@ -2,7 +2,6 @@ import math
 
 import cv2
 import mediapipe as mp
-from pygame.camera import Camera
 from pynput import mouse
 from pynput.mouse import Button
 
@@ -40,6 +39,7 @@ if __name__ == "__main__":
                                            (0, 0, 255), 2) if rect else None
     rmb_pressed = False
     lmb_pressed = False
+    mmb_pressed = False
 
     move_gesture = Gesture([lambda hand: hand.handedness == 'Right',
                             lambda hand: hand.is_extended(HandRegion.THUMB),
@@ -51,11 +51,25 @@ if __name__ == "__main__":
                               lambda hand: hand.is_extended(HandRegion.PINKY)
                               ])
 
+    lmb_gesture = Gesture([lambda hand: hand.handedness == 'Right',
+                           lambda hand: not hand.is_extended(HandRegion.INDEX),
+                           lambda hand: hand.is_extended(HandRegion.PINKY)
+                           ])
+
+    rmb_gesture = Gesture([lambda hand: hand.handedness == 'Right',
+                           lambda hand: not hand.is_extended(HandRegion.MIDDLE),
+                           lambda hand: hand.is_extended(HandRegion.PINKY)
+                           ])
+
+    mmb_gesture = Gesture([lambda hand: hand.handedness == 'Right',
+                           lambda hand: not hand.is_extended(HandRegion.RING),
+                           lambda hand: hand.is_extended(HandRegion.PINKY)])
+
     # For webcam input:
     camera = Webcam()
-    camera.add_pipeline("flipped",[FlipFilter()])
+    camera.add_pipeline("flipped", [FlipFilter()])
     with mp_hands.Hands(
-            model_complexity=0,
+            model_complexity=1,
             min_detection_confidence=0.5,
             min_tracking_confidence=0.5,
             max_num_hands=2) as hands:
@@ -67,13 +81,12 @@ if __name__ == "__main__":
             image.flags.writeable = False
             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
             results = hands.process(image)
-
-            # Draw the hand annotations on the image.
             image.flags.writeable = True
             image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+
             if results.multi_hand_landmarks:
 
-                # Identify right hand, read positions, calculate depth pass and set cursor position
+                # Gesture recognition and mouse input
                 for index, classi in enumerate(results.multi_handedness):
                     hand = Hand(results.multi_hand_landmarks[index].landmark, classi.classification[0].label)
 
@@ -88,65 +101,71 @@ if __name__ == "__main__":
                         image = cv2.circle(img=image, center=avg_position, radius=20, color=(255, 0, 0), thickness=3)
 
                         tp = 0.9
-                        if hand.is_extended(HandRegion.PINKY):
-                            if hand.is_extended(HandRegion.THUMB):
-                                # mouse movement
 
-                                x *= 640
-                                y *= 480
+                        if move_gesture.is_gesture(hand):
+                            # mouse movement
 
-                                if movement_timer.is_new_activation():
-                                    old_pos = (x, y)
+                            x *= 640
+                            y *= 480
 
-                                fact = 2
-                                movement = (movement[0] * (1 - tp) + (x - old_pos[0]) * tp) * fact, \
-                                           (movement[1] * (1 - tp) + (y - old_pos[1]) * tp) * fact
+                            if movement_timer.is_new_activation():
                                 old_pos = (x, y)
 
-                                mouse.move(movement[0], movement[1])
-                            else:
-                                # mouse scrolling
+                            fact = 2
+                            movement = (movement[0] * (1 - tp) + (x - old_pos[0]) * tp) * fact, \
+                                       (movement[1] * (1 - tp) + (y - old_pos[1]) * tp) * fact
+                            old_pos = (x, y)
 
-                                x *= 640
-                                y *= 480
+                            mouse.move(movement[0], movement[1])
 
-                                if not scroll_timer.is_new_activation():
-                                    old_pos = (x, y)
+                        if scroll_gesture.is_gesture(hand):
+                            # mouse scrolling
 
-                                fact = 2
-                                movement = (movement[0] * (1 - tp) + (x - old_pos[0]) * tp) * fact, \
-                                           (movement[1] * (1 - tp) + (y - old_pos[1]) * tp) * fact
+                            x *= 640
+                            y *= 480
+
+                            if scroll_timer.is_new_activation():
                                 old_pos = (x, y)
 
-                                sign = math.copysign(1, movement[1])
-                                scroll_movement = sign * (math.floor(math.fabs(movement[1])) / 10)
-                                mouse.scroll(0, int(scroll_movement))
+                            fact = 2
+                            movement = (movement[0] * (1 - tp) + (x - old_pos[0]) * tp) * fact, \
+                                       (movement[1] * (1 - tp) + (y - old_pos[1]) * tp) * fact
+                            old_pos = (x, y)
 
-                            # mouse button left
-                            if not hand.is_extended(HandRegion.INDEX):
-                                if not lmb_pressed:
-                                    mouse.press(Button.left)
-                                    lmb_pressed = True
-                            else:
-                                if lmb_pressed:
-                                    mouse.release(Button.left)
-                                    lmb_pressed = False
+                            sign = math.copysign(1, movement[1])
+                            scroll_movement = sign * (math.floor(math.fabs(movement[1])) / 10)
+                            print(scroll_movement)
+                            mouse.scroll(0, scroll_movement)
 
-                            # mouse button right
-                            if not hand.is_extended(HandRegion.MIDDLE):
-                                if not rmb_pressed:
-                                    mouse.press(Button.right)
-                                    rmb_pressed = True
-                            else:
-                                if rmb_pressed:
-                                    mouse.release(Button.right)
-                                    rmb_pressed = False
+                        # mouse button left
+                        if lmb_gesture.is_gesture(hand):
+                            if not lmb_pressed:
+                                mouse.press(Button.left)
+                                lmb_pressed = True
+                        else:
+                            if lmb_pressed:
+                                mouse.release(Button.left)
+                                lmb_pressed = False
 
-                            # mouse button middle
-                            if not hand.is_extended(HandRegion.RING):
+                        # mouse button right
+                        if rmb_gesture.is_gesture(hand):
+                            if not rmb_pressed:
+                                mouse.press(Button.right)
+                                rmb_pressed = True
+                        else:
+                            if rmb_pressed:
+                                mouse.release(Button.right)
+                                rmb_pressed = False
+
+                        # mouse button middle
+                        if mmb_gesture.is_gesture(hand):
+                            if not mmb_pressed:
                                 mouse.press(Button.middle)
-                            else:
+                                mmb_pressed = True
+                        else:
+                            if mmb_pressed:
                                 mouse.release(Button.middle)
+                                mmb_pressed = False
 
                 # Draw bones on image
                 draw_bones(results, image)
@@ -156,7 +175,7 @@ if __name__ == "__main__":
             if cv2.waitKey(5) & 0xFF == 27:
                 break
 
-    mouse.release(Button.left)
-    mouse.release(Button.right)
-    mouse.release(Button.middle)
-    camera.release()
+mouse.release(Button.left)
+mouse.release(Button.right)
+mouse.release(Button.middle)
+camera.release()
