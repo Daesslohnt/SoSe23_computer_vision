@@ -1,9 +1,9 @@
 import time
 
+import cv2
 import numpy as np
-from cv2.cv2 import *
 
-from Filter.filter import Filter
+from Camera.Filter.filter import Filter
 
 
 class Webcam:
@@ -20,7 +20,7 @@ class Webcam:
         self.pipelines = {
             "default": [Filter()]
         }
-        self.cam = VideoCapture(cam_port)
+        self.cam = cv2.VideoCapture(cam_port)
 
         if not self.cam.isOpened():
             raise EnvironmentError("Camera could not be opened. Exiting ...")
@@ -74,4 +74,6 @@ class Webcam:
         '''
         cv2.imwrite(image_name, self.get_image(pipeline_name))
 
-Filter
+    def release(self):
+        self.cam.release()
+

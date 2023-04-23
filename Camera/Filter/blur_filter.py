@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-from Filter.filter import Filter
+from Camera.Filter.filter import Filter
 
 
 class BlurFilter(Filter):

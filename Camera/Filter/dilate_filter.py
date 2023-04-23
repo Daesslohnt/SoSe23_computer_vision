@@ -1,8 +1,8 @@
 import numpy
 import numpy as np
-from cv2 import dilate
+import cv2
 
-from Filter.filter import Filter
+from Camera.Filter.filter import Filter
 
 
 class DilateFilter(Filter):
@@ -14,6 +14,6 @@ class DilateFilter(Filter):
         self._kernel = kernel
 
     def apply_to(self, image: np.ndarray) -> np.ndarray:
-        image = dilate(image, self._kernel, 1)
+        image = cv2.dilate(image, self._kernel, 1)
 
         return image

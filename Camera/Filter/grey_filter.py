@@ -1,7 +1,7 @@
 import numpy as np
-from cv2 import cv2
+import cv2
 
-from Filter.filter import Filter
+from Camera.Filter.filter import Filter
 
 
 class GreyFilter(Filter):

@@ -1,7 +1,7 @@
 import numpy as np
-from cv2 import absdiff
+import cv2
 
-from Filter.filter import Filter
+from Camera.Filter.filter import Filter
 
 
 class AbsDiffFilter(Filter):
@@ -18,6 +18,6 @@ class AbsDiffFilter(Filter):
             old_image = image
         self.last_image = image
 
-        image = absdiff(image, old_image)
+        image = cv2.absdiff(image, old_image)
 
         return image

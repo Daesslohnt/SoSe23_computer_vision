@@ -1,7 +1,7 @@
 import numpy as np
-from cv2 import resize
+import cv2
 
-from Filter.filter import Filter
+from Camera.Filter.filter import Filter
 
 
 class ResizeFilter(Filter):
@@ -15,6 +15,6 @@ class ResizeFilter(Filter):
         self._size = size
 
     def apply_to(self, image: np.ndarray) -> np.ndarray:
-        resize(image, self._size, image)
+        cv2.resize(image, self._size, image)
 
         return image
