@@ -25,6 +25,9 @@ class Webcam:
         if not self.cam.isOpened():
             raise EnvironmentError("Camera could not be opened. Exiting ...")
 
+        self.width = self.cam.get(cv2.CAP_PROP_FRAME_WIDTH)
+        self.height = self.cam.get(cv2.CAP_PROP_FRAME_HEIGHT)
+
     def add_pipeline(self, name: str, pipeline: [Filter]) -> None:
         '''
         Add a new pipeline to the Webcam. The name supplied is used in the get_image() method to address this pipeline.

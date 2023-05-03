@@ -2,6 +2,7 @@ import math
 
 import cv2
 import mediapipe as mp
+import numpy as np
 from pynput import mouse
 from pynput.mouse import Button
 
@@ -89,6 +90,7 @@ if __name__ == "__main__":
                 # Gesture recognition and mouse input
                 for index, classi in enumerate(results.multi_handedness):
                     hand = Hand(results.multi_hand_landmarks[index].landmark, classi.classification[0].label)
+                    hand.draw_vecs(image,np.array([camera.width,camera.height]))
 
                     if hand.handedness == 'Right':
                         draw_rect(hand.get_bounding_box(HandRegion.PALM))
