@@ -11,7 +11,7 @@ class Webcam:
     Webcam class used for getting images from the Webcam and applying filters to it.
     '''
 
-    def __init__(self, cam_port:int=0):
+    def __init__(self, cam_port: int = 0):
         '''
         Creates a new Webcam used for getting images from the Webcam and applying filters to it.
 
@@ -37,7 +37,6 @@ class Webcam:
         :return: None
         '''
         self.pipelines[name] = pipeline
-
 
     def get_image(self, pipeline_name: str = "default") -> np.ndarray:
         '''
@@ -79,4 +78,3 @@ class Webcam:
 
     def release(self):
         self.cam.release()
-

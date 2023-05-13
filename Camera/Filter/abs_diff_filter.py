@@ -1,5 +1,5 @@
-import numpy as np
 import cv2
+import numpy as np
 
 from Camera.Filter.filter import Filter
 
@@ -8,6 +8,7 @@ class AbsDiffFilter(Filter):
     '''
     Calculates the difference of the last and current supplied images.
     '''
+
     def __init__(self):
         super().__init__()
         self.last_image = None

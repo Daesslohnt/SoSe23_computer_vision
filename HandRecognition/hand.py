@@ -109,7 +109,7 @@ class Hand:
             else:
                 return Direction.DOWN == direction
 
-    def _get_region_vec(self, hand_region, tip = False):
+    def _get_region_vec(self, hand_region, tip=False):
         if not tip:
             if hand_region == HandRegion.PALM:
                 return [self.landmark[9].x - self.landmark[0].x,
