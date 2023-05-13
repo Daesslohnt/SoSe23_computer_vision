@@ -1,3 +1,4 @@
+import math
 from enum import Enum
 
 import cv2
@@ -29,34 +30,34 @@ class Hand:
             return None
 
     def is_extended(self, finger):
-        hand_vec = [self.landmark[9].x - self.landmark[0].x,
+        palm_vec = [self.landmark[9].x - self.landmark[0].x,
                     self.landmark[9].y - self.landmark[0].y]
         if finger is HandRegion.THUMB:
-            thumb_vec = [self.landmark[4].x - self.landmark[2].x,
-                         self.landmark[4].y - self.landmark[2].y]
+            # thumb_vec = [self.landmark[4].x - self.landmark[2].x,
+            #              self.landmark[4].y - self.landmark[2].y]
             intersection_pnt = get_intersect([self.landmark[4].x, self.landmark[4].y],
                                              [self.landmark[2].x, self.landmark[2].y],
                                              [self.landmark[0].x, self.landmark[0].y],
                                              [self.landmark[9].x, self.landmark[9].y])
             helper_vec = [intersection_pnt[0] - self.landmark[0].x,
                           intersection_pnt[1] - self.landmark[0].y]
-            return dot(hand_vec, helper_vec) < 0
+            return dot(palm_vec, helper_vec) < 0
         elif finger is HandRegion.INDEX:
             index_vec = [self.landmark[8].x - self.landmark[6].x,
                          self.landmark[8].y - self.landmark[6].y]
-            return dot(hand_vec, index_vec) > 0
+            return dot(palm_vec, index_vec) > 0
         elif finger is HandRegion.MIDDLE:
             middle_vec = [self.landmark[12].x - self.landmark[10].x,
                           self.landmark[12].y - self.landmark[10].y]
-            return dot(hand_vec, middle_vec) > 0
+            return dot(palm_vec, middle_vec) > 0
         elif finger is HandRegion.RING:
             ring_vec = [self.landmark[16].x - self.landmark[14].x,
                         self.landmark[16].y - self.landmark[14].y]
-            return dot(hand_vec, ring_vec) > 0
+            return dot(palm_vec, ring_vec) > 0
         elif finger is HandRegion.PINKY:
             pinky_vec = [self.landmark[20].x - self.landmark[18].x,
                          self.landmark[20].y - self.landmark[18].y]
-            return dot(hand_vec, pinky_vec) > 0
+            return dot(palm_vec, pinky_vec) > 0
         else:
             return False
 
@@ -94,6 +95,59 @@ class Hand:
         draw_arrow(middle_vec, middle_pnt)
         draw_arrow(ring_vec, ring_pnt)
         draw_arrow(pinky_vec, pinky_pnt)
+
+    def points_towards(self, hand_region, direction):
+        region_vec = self._get_region_vec(hand_region, True)
+        if math.fabs(region_vec[0]) > math.fabs(region_vec[1]):
+            if region_vec[0] > 0:
+                return Direction.RIGHT == direction
+            else:
+                return Direction.LEFT == direction
+        else:
+            if region_vec[1] < 0:
+                return Direction.UP == direction
+            else:
+                return Direction.DOWN == direction
+
+    def _get_region_vec(self, hand_region, tip = False):
+        if not tip:
+            if hand_region == HandRegion.PALM:
+                return [self.landmark[9].x - self.landmark[0].x,
+                        self.landmark[9].y - self.landmark[0].y]
+            elif hand_region == HandRegion.THUMB:
+                return [self.landmark[4].x - self.landmark[2].x,
+                        self.landmark[4].y - self.landmark[2].y]
+            elif hand_region == HandRegion.INDEX:
+                return [self.landmark[8].x - self.landmark[6].x,
+                        self.landmark[8].y - self.landmark[6].y]
+            elif hand_region == HandRegion.MIDDLE:
+                return [self.landmark[12].x - self.landmark[10].x,
+                        self.landmark[12].y - self.landmark[10].y]
+            elif hand_region == HandRegion.RING:
+                return [self.landmark[16].x - self.landmark[14].x,
+                        self.landmark[16].y - self.landmark[14].y]
+            elif hand_region == HandRegion.PINKY:
+                return [self.landmark[20].x - self.landmark[18].x,
+                        self.landmark[20].y - self.landmark[18].y]
+        else:
+            if hand_region == HandRegion.PALM:
+                return [self.landmark[9].x - self.landmark[0].x,
+                        self.landmark[9].y - self.landmark[0].y]
+            elif hand_region == HandRegion.THUMB:
+                return [self.landmark[4].x - self.landmark[3].x,
+                        self.landmark[4].y - self.landmark[3].y]
+            elif hand_region == HandRegion.INDEX:
+                return [self.landmark[8].x - self.landmark[7].x,
+                        self.landmark[8].y - self.landmark[7].y]
+            elif hand_region == HandRegion.MIDDLE:
+                return [self.landmark[12].x - self.landmark[11].x,
+                        self.landmark[12].y - self.landmark[11].y]
+            elif hand_region == HandRegion.RING:
+                return [self.landmark[16].x - self.landmark[15].x,
+                        self.landmark[16].y - self.landmark[15].y]
+            elif hand_region == HandRegion.PINKY:
+                return [self.landmark[20].x - self.landmark[19].x,
+                        self.landmark[20].y - self.landmark[19].y]
 
 
 def dot(vec1, vec2):
@@ -134,3 +188,10 @@ class HandRegion(Enum):
     MIDDLE = 3,
     RING = 4,
     PINKY = 5
+
+
+class Direction(Enum):
+    UP = 0,
+    DOWN = 1,
+    LEFT = 2,
+    RIGHT = 3
