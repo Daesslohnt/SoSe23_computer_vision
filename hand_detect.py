@@ -64,7 +64,9 @@ if __name__ == "__main__":
 
     mmb_gesture = Gesture([lambda hand: hand.handedness == 'Right',
                            lambda hand: not hand.is_extended(HandRegion.RING),
-                           lambda hand: hand.is_extended(HandRegion.PINKY)])
+                           lambda hand: hand.is_extended(HandRegion.PINKY)
+                           ])
+
 
     # For webcam input:
     camera = Webcam()
@@ -96,8 +98,8 @@ if __name__ == "__main__":
                         draw_rect(hand.get_bounding_box(HandRegion.PALM))
 
                         # Calculate average position of wrist,thumb and pinkie
-                        x = (hand.landmark[0].x + hand.landmark[4].x + hand.landmark[20].x) / 3
-                        y = (hand.landmark[0].y + hand.landmark[4].y + hand.landmark[20].y) / 3
+                        x = (hand.landmark[0].x + hand.landmark[5].x + hand.landmark[9].x + hand.landmark[13].x + hand.landmark[17].x) / 5
+                        y = (hand.landmark[0].y + hand.landmark[5].y + hand.landmark[9].y + hand.landmark[13].y + hand.landmark[17].y) / 5
                         avg_position = [int(x * 640), int(y * 480)]
 
                         image = cv2.circle(img=image, center=avg_position, radius=20, color=(255, 0, 0), thickness=3)
