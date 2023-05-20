@@ -1,20 +1,21 @@
 import os.path
 import time
 
-from cv2 import cv2
+import cv2
 
-from Filter.abs_diff_filter import AbsDiffFilter
-from Filter.addition_filter import AdditionFilter
-from Filter.blur_filter import BlurFilter
-from Filter.dilate_filter import DilateFilter
-from Filter.filter import *
-from Filter.grey_filter import GreyFilter
-from Filter.threshold_filter import ThresholdFilter
-from webcam import Webcam
+from Camera.Filter.abs_diff_filter import AbsDiffFilter
+from Camera.Filter.addition_filter import AdditionFilter
+from Camera.Filter.blur_filter import BlurFilter
+from Camera.Filter.dilate_filter import DilateFilter
+from Camera.Filter.filter import *
+from Camera.Filter.flip_filter import FlipFilter
+from Camera.Filter.grey_filter import GreyFilter
+from Camera.Filter.threshold_filter import ThresholdFilter
+from Camera.webcam import Webcam
 
 cam = Webcam()
 cam.add_pipeline("Filter", [GreyFilter(), BlurFilter(), AbsDiffFilter(), ThresholdFilter(), DilateFilter(np.ones(1)),
-                            AdditionFilter((0.5, 1.0))])
+                            AdditionFilter((0.9, 1.0)), FlipFilter()])
 path = os.path.abspath("/home/benedikts/PycharmProjects/computervisionss23/Hello.png")
 old_time = 0
 
