@@ -9,7 +9,7 @@ X = np.load(os.path.join("..", "daten", "X.npy"))
 y = np.load(os.path.join("..", "daten", "y.npy"))
 
 X = np.reshape(X, (X.shape[0], 21, 2, 1))
-y = np.reshape(y, (y.shape[0], 7))
+y = np.reshape(y, (y.shape[0], 8))
 
 
 def make_model(input_shape):
@@ -34,7 +34,7 @@ def make_model(input_shape):
     gap = k.layers.GlobalAvgPool2D()(conv)
     gap = k.layers.Dense(100)(gap)
 
-    output_layer = k.layers.Dense(7, activation="softmax")(gap)
+    output_layer = k.layers.Dense(8, activation="softmax")(gap)
 
     return k.models.Model(inputs=input_layer, outputs=output_layer)
 

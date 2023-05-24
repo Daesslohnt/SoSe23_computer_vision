@@ -6,6 +6,7 @@ import cv2
 """
     For each gesture it's own directory:
     left click
+    double click
     right click
     scroll up
     scroll down
@@ -18,6 +19,7 @@ mp_hands = mp.solutions.hands
 
 IMG_DIR = os.path.join("..", "daten")
 LEFT_CLICK_DIR = os.path.join(IMG_DIR, "left_click")
+DOUBLE_CLICK_DIR = os.path.join(IMG_DIR, "double_click")
 RIGHT_CLICK_DIR = os.path.join(IMG_DIR, "right_click")
 SCROLL_UP_DIR = os.path.join(IMG_DIR, "scroll_up")
 SCROLL_DOWN_DIR = os.path.join(IMG_DIR, "scroll_down")
@@ -26,6 +28,7 @@ HOLD_ON_DIR = os.path.join(IMG_DIR, "hold_on")
 DEFAULT_DIR = os.path.join(IMG_DIR, "default")
 
 left_click_files = [os.path.join(LEFT_CLICK_DIR, name) for name in os.listdir(LEFT_CLICK_DIR)]
+double_click_files = [os.path.join(DOUBLE_CLICK_DIR, name) for name in os.listdir(DOUBLE_CLICK_DIR)]
 right_click_files = [os.path.join(RIGHT_CLICK_DIR, name) for name in os.listdir(RIGHT_CLICK_DIR)]
 scroll_up_files = [os.path.join(SCROLL_UP_DIR, name) for name in os.listdir(SCROLL_UP_DIR)]
 scroll_down_files = [os.path.join(SCROLL_DOWN_DIR, name) for name in os.listdir(SCROLL_DOWN_DIR)]
@@ -35,6 +38,7 @@ default_files = [os.path.join(DEFAULT_DIR, name) for name in os.listdir(DEFAULT_
 
 all_files = {
     "left_click": left_click_files,
+    "double_click": double_click_files,
     "right_click": right_click_files,
     "scroll_up": scroll_up_files,
     "scroll_down": scroll_down_files,
@@ -73,21 +77,23 @@ with mp_hands.Hands(
 
                     X.append(landmarks)
 
-                    label_code = [0]*7
+                    label_code = [0]*8
                     if label == "left_click":
                         label_code[0] = 1
-                    elif label == "right_click":
+                    if label == "double_click":
                         label_code[1] = 1
-                    elif label == "scroll_up":
+                    elif label == "right_click":
                         label_code[2] = 1
-                    elif label == "scroll_down":
+                    elif label == "scroll_up":
                         label_code[3] = 1
-                    elif label == "scroll_wheel_click":
+                    elif label == "scroll_down":
                         label_code[4] = 1
-                    elif label == "hold_on":
+                    elif label == "scroll_wheel_click":
                         label_code[5] = 1
-                    else:
+                    elif label == "hold_on":
                         label_code[6] = 1
+                    else:
+                        label_code[7] = 1
                     y.append(label_code)
 
 X = np.array(X)
