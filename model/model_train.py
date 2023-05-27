@@ -63,24 +63,26 @@ history = model.fit(
     X_train,
     y_train,
     batch_size=32,
-    epochs=5,
+    epochs=300,
     validation_split=0.15,
     verbose=1,
     callbacks=callbacks
 )
 
 plt.figure()
-plt.plot(history.history["loss"])
-plt.plot(history.history["val_loss"])
+plt.plot(history.history["loss"], label="train")
+plt.plot(history.history["val_loss"], label="validation")
 plt.title("Loss")
 plt.xlabel("epoch")
 plt.ylabel("loss")
+plt.legend()
 plt.savefig("loss.png")
 
 plt.figure()
-plt.plot(history.history["categorical_accuracy"])
-plt.plot(history.history["val_categorical_accuracy"])
+plt.plot(history.history["categorical_accuracy"], label="train")
+plt.plot(history.history["val_categorical_accuracy"], label="validation")
 plt.title("categorical_accuracy")
 plt.xlabel("epoch")
 plt.ylabel("accuracy")
+plt.legend()
 plt.savefig("categorical_accuracy.png")
