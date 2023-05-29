@@ -2,6 +2,7 @@ import keras as k
 import numpy as np
 import os
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import recall_score
 import matplotlib.pyplot as plt
 
 
@@ -15,26 +16,12 @@ y = np.reshape(y, (y.shape[0], 8))
 def make_model(input_shape):
     input_layer = k.layers.Input(input_shape)
 
-    conv = k.layers.Conv2D(filters=64, kernel_size=3, padding="same")(input_layer)
-    conv = k.layers.BatchNormalization()(conv)
-    conv = k.layers.MaxPooling2D(pool_size=3, padding="same")(conv)
+    # TODO: try different architectures
+    conv = k.layers.Conv2D(32, 3, activation='relu', padding="same")(input_layer)
+    conv = k.layers.Flatten()(conv)
+    fc = k.layers.Dense(128, activation="relu")(conv)
 
-    conv = k.layers.Conv2D(filters=32, kernel_size=3, padding="same")(conv)
-    conv = k.layers.BatchNormalization()(conv)
-    conv = k.layers.ReLU()(conv)
-
-    conv = k.layers.Conv2D(filters=16, kernel_size=3, padding="same")(conv)
-    conv = k.layers.BatchNormalization()(conv)
-    conv = k.layers.ReLU()(conv)
-
-    conv = k.layers.Conv2D(filters=8, kernel_size=2, padding="same")(conv)
-    conv = k.layers.BatchNormalization()(conv)
-    conv = k.layers.ReLU()(conv)
-
-    gap = k.layers.GlobalAvgPool2D()(conv)
-    gap = k.layers.Dense(100)(gap)
-
-    output_layer = k.layers.Dense(8, activation="softmax")(gap)
+    output_layer = k.layers.Dense(8, activation="softmax")(fc)
 
     return k.models.Model(inputs=input_layer, outputs=output_layer)
 
@@ -42,9 +29,9 @@ model = make_model(X.shape[1:])
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, shuffle=True)
 model.compile(
-    optimizer="sgd",
+    optimizer="adam",
     loss=k.losses.CategoricalCrossentropy(),
-    metrics=["categorical_accuracy", "Recall"]
+    metrics=["Recall", "categorical_accuracy"]
 )
 
 callbacks = [
@@ -62,12 +49,32 @@ callbacks = [
 history = model.fit(
     X_train,
     y_train,
-    batch_size=32,
-    epochs=300,
+    batch_size=12,
+    epochs=50,
     validation_split=0.15,
     verbose=1,
     callbacks=callbacks
 )
+
+preds = model.predict(X_test)
+
+for i in range(len(preds)):
+    max_index = np.argmax(preds[i])
+    for j in range(8):
+        preds[i][j] = 1 if j == max_index else 0
+
+
+p_left, p_double, p_right, p_up, p_down, p_wheel, p_hold, p_default = np.array(preds).T
+t_left, t_double, t_right, t_up, t_down, t_wheel, t_hold, t_default = y_test.T
+print("Sänsitivität:")
+print("left:", recall_score(t_left, p_left))
+print("double:", recall_score(t_double, p_double))
+print("right:", recall_score(t_right, p_right))
+print("up:", recall_score(t_up, p_up))
+print("down:", recall_score(t_down, p_down))
+print("wheel:", recall_score(t_wheel, p_wheel))
+print("hold:", recall_score(t_hold, p_hold))
+print("default:", recall_score(t_default, p_default))
 
 plt.figure()
 plt.plot(history.history["loss"], label="train")
@@ -77,6 +84,15 @@ plt.xlabel("epoch")
 plt.ylabel("loss")
 plt.legend()
 plt.savefig("loss.png")
+
+plt.figure()
+plt.plot(history.history["recall"], label="train")
+plt.plot(history.history["val_recall"], label="validation")
+plt.title("Recall")
+plt.xlabel("epoch")
+plt.ylabel("recall")
+plt.legend()
+plt.savefig("recall.png")
 
 plt.figure()
 plt.plot(history.history["categorical_accuracy"], label="train")
