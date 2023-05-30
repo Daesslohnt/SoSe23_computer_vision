@@ -44,12 +44,18 @@ if __name__ == "__main__":
     rock_gesture_pressed = False
 
     fast_gesture = Gesture([lambda hand: hand.handedness == 'Left',
+                            lambda hand: hand.is_extended(HandRegion.THUMB),
                             lambda hand: hand.is_extended(HandRegion.INDEX),
-                            lambda hand: hand.is_extended(HandRegion.MIDDLE)
+                            lambda hand: hand.is_extended(HandRegion.MIDDLE),
+                            lambda hand: hand.is_extended(HandRegion.RING),
+                            lambda hand: hand.is_extended(HandRegion.PINKY)
                             ])
 
     move_gesture = Gesture([lambda hand: hand.handedness == 'Right',
                             lambda hand: hand.is_extended(HandRegion.THUMB),
+                            lambda hand: hand.is_extended(HandRegion.INDEX),
+                            lambda hand: hand.is_extended(HandRegion.MIDDLE),
+                            lambda hand: hand.is_extended(HandRegion.RING),
                             lambda hand: hand.is_extended(HandRegion.PINKY)
                             ])
 
@@ -72,34 +78,39 @@ if __name__ == "__main__":
                                  ])
 
     lmb_gesture = Gesture([lambda hand: hand.handedness == 'Right',
-                           lambda hand: not hand.is_extended(HandRegion.INDEX),
+                           lambda hand: not hand.is_extended(HandRegion.THUMB),
+                           lambda hand: hand.is_extended(HandRegion.INDEX),
                            lambda hand: hand.is_extended(HandRegion.MIDDLE),
-                           lambda hand: hand.is_extended(HandRegion.PINKY)
+                           lambda hand: hand.is_extended(HandRegion.PINKY),
+                           lambda hand: hand.is_extended(HandRegion.RING),
                            ])
 
     rmb_gesture = Gesture([lambda hand: hand.handedness == 'Right',
+                           lambda hand: hand.is_extended(HandRegion.THUMB),
                            lambda hand: hand.is_extended(HandRegion.INDEX),
                            lambda hand: not hand.is_extended(HandRegion.MIDDLE),
+                           lambda hand: hand.is_extended(HandRegion.RING),
                            lambda hand: hand.is_extended(HandRegion.PINKY)
                            ])
 
-    mmb_gesture = Gesture([lambda hand: hand.handedness == 'Right',
-                           lambda hand: not hand.is_extended(HandRegion.RING),
-                           lambda hand: hand.is_extended(HandRegion.PINKY)
-                           ])
+    # mmb_gesture = Gesture([lambda hand: hand.handedness == 'Right',
+    #                        lambda hand: not hand.is_extended(HandRegion.RING),
+    #                        lambda hand: hand.is_extended(HandRegion.PINKY)
+    #                        ])
 
     double_lmb_gesture = Gesture([lambda hand: hand.handedness == 'Right',
+                                  lambda hand: hand.is_extended(HandRegion.THUMB),
                                   lambda hand: not hand.is_extended(HandRegion.INDEX),
-                                  lambda hand: not hand.is_extended(HandRegion.MIDDLE),
+                                  lambda hand: hand.is_extended(HandRegion.MIDDLE),
+                                  lambda hand: hand.is_extended(HandRegion.RING),
                                   lambda hand: hand.is_extended(HandRegion.PINKY)
                                   ])
 
-    rock_gesture = Gesture([lambda hand: hand.points_towards(HandRegion.INDEX, Direction.UP),
-                            lambda hand: hand.is_extended(HandRegion.THUMB),
-                            lambda hand: hand.is_extended(HandRegion.INDEX),
+    rock_gesture = Gesture([lambda hand: not hand.is_extended(HandRegion.THUMB),
+                            lambda hand: not hand.is_extended(HandRegion.INDEX),
                             lambda hand: not hand.is_extended(HandRegion.MIDDLE),
                             lambda hand: not hand.is_extended(HandRegion.RING),
-                            lambda hand: hand.is_extended(HandRegion.PINKY)]
+                            lambda hand: not hand.is_extended(HandRegion.PINKY)]
                            )
 
     # For webcam input:
