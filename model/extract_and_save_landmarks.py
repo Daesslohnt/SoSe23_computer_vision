@@ -80,7 +80,7 @@ with mp_hands.Hands(
                     label_code = [0]*8
                     if label == "left_click":
                         label_code[0] = 1
-                    if label == "double_click":
+                    elif label == "double_click":
                         label_code[1] = 1
                     elif label == "right_click":
                         label_code[2] = 1
@@ -94,10 +94,11 @@ with mp_hands.Hands(
                         label_code[6] = 1
                     else:
                         label_code[7] = 1
+                    assert sum(label_code) == 1, "wrong classification"
                     y.append(label_code)
 
 X = np.array(X)
 y = np.array(y)
 
-np.save(os.path.join(IMG_DIR, "X.npy"), X)
-np.save(os.path.join(IMG_DIR, "y.npy"), y)
+np.save(os.path.join(IMG_DIR, "X-H.npy"), X)
+np.save(os.path.join(IMG_DIR, "y-H.npy"), y)

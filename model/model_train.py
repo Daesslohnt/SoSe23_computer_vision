@@ -18,8 +18,12 @@ def make_model(input_shape):
 
     # TODO: try different architectures
     conv = k.layers.Conv2D(32, 3, activation='relu', padding="same")(input_layer)
+    conv = k.layers.Conv2D(64, 3, activation='relu', padding="same")(conv)
     conv = k.layers.Flatten()(conv)
     fc = k.layers.Dense(128, activation="relu")(conv)
+    fc = k.layers.Dense(64, activation="tanh")(fc)
+    fc = k.layers.Dense(32, activation="sigmoid")(fc)
+    fc = k.layers.Dense(16, activation="tanh")(fc)
 
     output_layer = k.layers.Dense(8, activation="softmax")(fc)
 
@@ -49,8 +53,8 @@ callbacks = [
 history = model.fit(
     X_train,
     y_train,
-    batch_size=12,
-    epochs=50,
+    batch_size=32,
+    epochs=30,
     validation_split=0.15,
     verbose=1,
     callbacks=callbacks
@@ -102,3 +106,15 @@ plt.xlabel("epoch")
 plt.ylabel("accuracy")
 plt.legend()
 plt.savefig("categorical_accuracy.png")
+
+"""
+    Sänsitivität:
+    left: 1.0
+    double: 1.0
+    right: 1.0
+    up: 1.0
+    down: 1.0
+    wheel: 0.0
+    hold: 1.0
+    default: 1.0
+"""
