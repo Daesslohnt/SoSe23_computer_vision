@@ -3,17 +3,22 @@ import mediapipe as mp
 import numpy as np
 from pynput import mouse
 from pynput.mouse import Button
+from keras.models import load_model
+from os.path import join
 
 from Camera.Filter.blur_filter import BlurFilter
 from Camera.Filter.flip_filter import FlipFilter
 from Camera.webcam import Webcam
-from HandRecognition.gesture import Gesture
+from HandRecognition.gesture import Gesture, GestureClass
 from HandRecognition.hand import HandRegion, Hand, Direction
 from Helper.time_controller import TimeController
+from Helper.mouse_controller import MouseController
 
 mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
 mp_hands = mp.solutions.hands
+
+model = load_model(join("model", "best_model.h5"))
 
 
 def draw_bones(results, image):
@@ -29,7 +34,8 @@ def draw_bones(results, image):
 
 
 if __name__ == "__main__":
-    mouse = mouse.Controller()
+    # mouse = mouse.Controller()
+    mouse_controller = MouseController()
 
     old_pos = (0, 0)
     movement = (0, 0)
@@ -37,11 +43,11 @@ if __name__ == "__main__":
     movement_timer = TimeController()
     draw_rect = lambda rect: cv2.rectangle(image, rect.get_bounding_box()[0], rect.get_bounding_box()[1],
                                            (0, 0, 255), 2) if rect else None
-    rmb_pressed = False
-    lmb_pressed = False
-    mmb_pressed = False
-    double_lmb_pressed = False
-    rock_gesture_pressed = False
+    # rmb_pressed = False
+    # lmb_pressed = False
+    # mmb_pressed = False
+    # double_lmb_pressed = False
+    # rock_gesture_pressed = False
 
     fast_gesture = Gesture([lambda hand: hand.handedness == 'Left',
                             lambda hand: hand.is_extended(HandRegion.THUMB),
@@ -138,6 +144,7 @@ if __name__ == "__main__":
                 # Gesture recognition and mouse input
                 for index, classi in enumerate(results.multi_handedness):
                     hand = Hand(results.multi_hand_landmarks[index].landmark, classi.classification[0].label)
+                    predictions = model.predict(hand.normalize_landmarks(), verbose=0)
                     hand.draw_vecs(image, np.array([camera.width, camera.height]))
 
                     tp = 0.9
@@ -164,62 +171,66 @@ if __name__ == "__main__":
                                    (movement[1] * (1 - tp) + (y - old_pos[1]) * tp) * fact
                         old_pos = (x, y)
 
-                        mouse.move(movement[0], movement[1])
+                        # mouse.move(movement[0], movement[1])
+                        mouse_controller.move_cursor(movement)
 
-                    # Scroll movement
-                    if scroll_down_gesture.is_gesture(hand):
-                        mouse.scroll(0, -1)
-
-                    if scrool_up_gesture.is_gesture(hand):
-                        mouse.scroll(0, 1)
-
-                    # mouse button left
-                    if lmb_gesture.is_gesture(hand):
-                        if not lmb_pressed:
-                            mouse.press(Button.left)
-                            lmb_pressed = True
-                    else:
-                        if lmb_pressed:
-                            mouse.release(Button.left)
-                            lmb_pressed = False
-
-                    # mouse button right
-                    if rmb_gesture.is_gesture(hand):
-                        if not rmb_pressed:
-                            mouse.press(Button.right)
-                            rmb_pressed = True
-                    else:
-                        if rmb_pressed:
-                            mouse.release(Button.right)
-                            rmb_pressed = False
-
-                    # mouse button middle
-                    if mmb_gesture.is_gesture(hand):
-                        if not mmb_pressed:
-                            mouse.press(Button.middle)
-                            mmb_pressed = True
-                    else:
-                        if mmb_pressed:
-                            mouse.release(Button.middle)
-                            mmb_pressed = False
-
-                    # double klicks
-                    if double_lmb_gesture.is_gesture(hand):
-                        if not double_lmb_pressed:
-                            mouse.click(Button.left, 2)
-                            double_lmb_pressed = True
-                    else:
-                        if double_lmb_pressed:
-                            double_lmb_pressed = False
-
-                    # My Gesture
-                    if rock_gesture.is_gesture(hand):
-                        if not rock_gesture_pressed:
-                            print("Lets Rock!")
-                            rock_gesture_pressed = True
-                    else:
-                        if rock_gesture_pressed:
-                            rock_gesture_pressed = False
+                    gesture_class = Gesture.define_gesture_class(predictions)
+                    print(gesture_class)
+                    mouse_controller.gesture_action(gesture_class)
+                    # # Scroll movement
+                    # if scroll_down_gesture.is_gesture(hand):
+                    #     mouse.scroll(0, -1)
+                    #
+                    # if scrool_up_gesture.is_gesture(hand):
+                    #     mouse.scroll(0, 1)
+                    #
+                    # # mouse button left
+                    # if lmb_gesture.is_gesture(hand):
+                    #     if not lmb_pressed:
+                    #         mouse.press(Button.left)
+                    #         lmb_pressed = True
+                    # else:
+                    #     if lmb_pressed:
+                    #         mouse.release(Button.left)
+                    #         lmb_pressed = False
+                    #
+                    # # mouse button right
+                    # if rmb_gesture.is_gesture(hand):
+                    #     if not rmb_pressed:
+                    #         mouse.press(Button.right)
+                    #         rmb_pressed = True
+                    # else:
+                    #     if rmb_pressed:
+                    #         mouse.release(Button.right)
+                    #         rmb_pressed = False
+                    #
+                    # # mouse button middle
+                    # if mmb_gesture.is_gesture(hand):
+                    #     if not mmb_pressed:
+                    #         mouse.press(Button.middle)
+                    #         mmb_pressed = True
+                    # else:
+                    #     if mmb_pressed:
+                    #         mouse.release(Button.middle)
+                    #         mmb_pressed = False
+                    #
+                    # # double klicks
+                    # if double_lmb_gesture.is_gesture(hand):
+                    #     if not double_lmb_pressed:
+                    #         mouse.click(Button.left, 2)
+                    #         double_lmb_pressed = True
+                    # else:
+                    #     if double_lmb_pressed:
+                    #         double_lmb_pressed = False
+                    #
+                    # # My Gesture
+                    # if rock_gesture.is_gesture(hand):
+                    #     if not rock_gesture_pressed:
+                    #         print("Lets Rock!")
+                    #         rock_gesture_pressed = True
+                    # else:
+                    #     if rock_gesture_pressed:
+                    #         rock_gesture_pressed = False
 
                 # Draw bones on image
                 draw_bones(results, image)

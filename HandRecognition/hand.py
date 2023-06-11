@@ -13,6 +13,20 @@ class Hand:
         self.landmark = landmark
         self.handedness = handedness
 
+    def normalize_landmarks(self):
+        '''
+        Normalize landmarks from 0 to 1
+        '''
+        item = np.array([[lm.x, lm.y] for lm in self.landmark]).T
+        x, y = item
+        x_max, x_min = max(x), min(x)
+        y_max, y_min = max(y), min(y)
+        x = (x - x_min) / (x_max - x_min)
+        y = (y - y_min) / (y_max - y_min)
+        item[0] = x
+        item[1] = y
+        return np.reshape(item.T, (1, 21, 2))
+
     def get_bounding_box(self, hand_region):
         if hand_region is HandRegion.PALM:
             return Rectangle([(self.landmark[i].x, self.landmark[i].y) for i in [0, 5, 9, 13, 17]], [640, 480])
