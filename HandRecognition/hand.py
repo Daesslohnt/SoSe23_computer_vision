@@ -3,6 +3,7 @@ from enum import Enum
 
 import cv2
 import numpy as np
+from tensorflow import convert_to_tensor, reshape
 
 from Helper.rectangle import Rectangle
 
@@ -25,7 +26,8 @@ class Hand:
         y = (y - y_min) / (y_max - y_min)
         item[0] = x
         item[1] = y
-        return np.reshape(item.T, (1, 21, 2))
+        tensor = convert_to_tensor(item.T, np.float32)
+        return reshape(tensor, (1, 21, 2, 1))
 
     def get_bounding_box(self, hand_region):
         if hand_region is HandRegion.PALM:

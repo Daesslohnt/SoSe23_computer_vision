@@ -13,6 +13,11 @@ class MouseController:
         self.double_lmb_pressed = False
         self.rock_gesture_pressed = False
 
+    def __del__(self):
+        self.mouse.release(Button.left)
+        self.mouse.release(Button.right)
+        self.mouse.release(Button.middle)
+
     def move_cursor(self, movement):
         self.mouse.move(movement[0], movement[1])
 

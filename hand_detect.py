@@ -5,6 +5,7 @@ from pynput import mouse
 from pynput.mouse import Button
 from keras.models import load_model
 from os.path import join
+import asyncio
 
 from Camera.Filter.blur_filter import BlurFilter
 from Camera.Filter.flip_filter import FlipFilter
@@ -13,12 +14,13 @@ from HandRecognition.gesture import Gesture, GestureClass
 from HandRecognition.hand import HandRegion, Hand, Direction
 from Helper.time_controller import TimeController
 from Helper.mouse_controller import MouseController
+from model.freeze_graph import load_frozen_graph
 
 mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
 mp_hands = mp.solutions.hands
 
-model = load_model(join("model", "best_model.h5"))
+model = load_frozen_graph(None)
 
 
 def draw_bones(results, image):
@@ -32,8 +34,13 @@ def draw_bones(results, image):
             mp_drawing_styles.get_default_hand_connections_style()
         )
 
+async def do_gesture_action(hand, mouse_controller):
+    predictions = model(hand.normalize_landmarks())[0].numpy()
+    gesture_class = Gesture.define_gesture_class(predictions)
+    print(gesture_class)
+    mouse_controller.gesture_action(gesture_class)
 
-if __name__ == "__main__":
+async def main():
     # mouse = mouse.Controller()
     mouse_controller = MouseController()
 
@@ -144,7 +151,7 @@ if __name__ == "__main__":
                 # Gesture recognition and mouse input
                 for index, classi in enumerate(results.multi_handedness):
                     hand = Hand(results.multi_hand_landmarks[index].landmark, classi.classification[0].label)
-                    predictions = model.predict(hand.normalize_landmarks(), verbose=0)
+                    task = asyncio.create_task(do_gesture_action(hand, mouse_controller))
                     hand.draw_vecs(image, np.array([camera.width, camera.height]))
 
                     tp = 0.9
@@ -174,9 +181,7 @@ if __name__ == "__main__":
                         # mouse.move(movement[0], movement[1])
                         mouse_controller.move_cursor(movement)
 
-                    gesture_class = Gesture.define_gesture_class(predictions)
-                    print(gesture_class)
-                    mouse_controller.gesture_action(gesture_class)
+                    await task
                     # # Scroll movement
                     # if scroll_down_gesture.is_gesture(hand):
                     #     mouse.scroll(0, -1)
@@ -241,8 +246,8 @@ if __name__ == "__main__":
             key = cv2.waitKey(5)
             if key == 27 or key == 113:
                 break
+    del mouse_controller
+    camera.release()
 
-mouse.release(Button.left)
-mouse.release(Button.right)
-mouse.release(Button.middle)
-camera.release()
+if __name__ == '__main__':
+    asyncio.run(main())

@@ -18,12 +18,12 @@ def make_model(input_shape):
 
     # TODO: try different architectures
     conv = k.layers.Conv2D(32, 3, activation='relu', padding="same")(input_layer)
-    conv = k.layers.Conv2D(64, 3, activation='relu', padding="same")(conv)
+   # conv = k.layers.Conv2D(64, 3, activation='relu', padding="same")(conv)
     conv = k.layers.Flatten()(conv)
     fc = k.layers.Dense(128, activation="relu")(conv)
-    fc = k.layers.Dense(64, activation="tanh")(fc)
-    fc = k.layers.Dense(32, activation="sigmoid")(fc)
-    fc = k.layers.Dense(16, activation="tanh")(fc)
+   # fc = k.layers.Dense(64, activation="tanh")(fc)
+   # fc = k.layers.Dense(32, activation="sigmoid")(fc)
+   # fc = k.layers.Dense(16, activation="tanh")(fc)
 
     output_layer = k.layers.Dense(8, activation="softmax")(fc)
 
