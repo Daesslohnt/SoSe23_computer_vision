@@ -20,9 +20,9 @@ class Gesture:
         elif most_possible == 1:
             return GestureClass.DOUBLE_CLICK
         elif most_possible == 2:
-            return GestureClass.SCROLL_UP
-        elif most_possible == 3:
             return GestureClass.RIGHT_CLICK
+        elif most_possible == 3:
+            return GestureClass.SCROLL_UP
         elif most_possible == 4:
             return GestureClass.SCROLL_DOWN
         elif most_possible == 5:
