@@ -35,7 +35,7 @@ class Hand:
         if finger is HandRegion.THUMB:
             # thumb_vec = [self.landmark[4].x - self.landmark[2].x,
             #              self.landmark[4].y - self.landmark[2].y]
-            intersection_pnt = get_intersect([self.landmark[4].x, self.landmark[4].y],
+            intersection_pnt = get_intersect([self.landmark[3].x, self.landmark[3].y],
                                              [self.landmark[2].x, self.landmark[2].y],
                                              [self.landmark[0].x, self.landmark[0].y],
                                              [self.landmark[9].x, self.landmark[9].y])
@@ -69,8 +69,8 @@ class Hand:
                     self.landmark[9].y - self.landmark[0].y] * dims
         hand_pnt = [self.landmark[0].x, self.landmark[0].y] * dims
 
-        thumb_vec = [self.landmark[4].x - self.landmark[2].x,
-                     self.landmark[4].y - self.landmark[2].y] * dims
+        thumb_vec = [self.landmark[3].x - self.landmark[2].x,
+                     self.landmark[3].y - self.landmark[2].y] * dims
         thumb_pnt = [self.landmark[2].x, self.landmark[2].y] * dims
 
         index_vec = [self.landmark[8].x - self.landmark[6].x,

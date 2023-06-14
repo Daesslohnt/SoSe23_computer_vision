@@ -57,6 +57,7 @@ with mp_hands.Hands(
 
                     index = np.argmax(prediction[0])
                     print('-'*30)
+                    print(np.max(prediction[0]))
                     if index == 0:
                         print("left_click")
                     elif index == 1:

@@ -1,3 +1,5 @@
+import time
+
 import cv2
 import mediapipe as mp
 import numpy as np
@@ -33,8 +35,13 @@ if __name__ == "__main__":
 
     old_pos = (0, 0)
     movement = (0, 0)
-    scroll_timer = TimeController()
     movement_timer = TimeController()
+    scroll_timer = TimeController()
+    scroll_timer_up = TimeController()
+    scroll_timer_down = TimeController()
+    scroll_up_timeout = 0.5
+    scroll_down_timeout = 0.5
+
     draw_rect = lambda rect: cv2.rectangle(image, rect.get_bounding_box()[0], rect.get_bounding_box()[1],
                                            (0, 0, 255), 2) if rect else None
     rmb_pressed = False
@@ -168,10 +175,20 @@ if __name__ == "__main__":
 
                     # Scroll movement
                     if scroll_down_gesture.is_gesture(hand):
-                        mouse.scroll(0, -1)
+                        if scroll_down_timeout == 0.5 or scroll_down_timeout <= 0:
+                            scroll_timer_down.activate()
+                            mouse.scroll(0, -1)
+                        scroll_down_timeout -= scroll_timer_down.activate()
+                    else:
+                        scroll_down_timeout = 0.5
 
                     if scrool_up_gesture.is_gesture(hand):
-                        mouse.scroll(0, 1)
+                        if scroll_up_timeout == 0.5 or scroll_up_timeout <= 0:
+                            scroll_timer_up.activate()
+                            mouse.scroll(0, 1)
+                        scroll_up_timeout -= scroll_timer_up.activate()
+                    else:
+                        scroll_up_timeout = 0.5
 
                     # mouse button left
                     if lmb_gesture.is_gesture(hand):
@@ -194,14 +211,14 @@ if __name__ == "__main__":
                             rmb_pressed = False
 
                     # mouse button middle
-                    if mmb_gesture.is_gesture(hand):
-                        if not mmb_pressed:
-                            mouse.press(Button.middle)
-                            mmb_pressed = True
-                    else:
-                        if mmb_pressed:
-                            mouse.release(Button.middle)
-                            mmb_pressed = False
+                    # if mmb_gesture.is_gesture(hand):
+                    #     if not mmb_pressed:
+                    #         mouse.press(Button.middle)
+                    #         mmb_pressed = True
+                    # else:
+                    #     if mmb_pressed:
+                    #         mouse.release(Button.middle)
+                    #         mmb_pressed = False
 
                     # double klicks
                     if double_lmb_gesture.is_gesture(hand):
