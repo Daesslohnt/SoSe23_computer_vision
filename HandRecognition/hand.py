@@ -2,6 +2,7 @@ import math
 from enum import Enum
 
 import cv2
+import numpy
 import numpy as np
 
 from Helper.rectangle import Rectangle
@@ -29,19 +30,35 @@ class Hand:
         else:
             return None
 
+    def is_twisted(self):
+        palm_vec_vertical = [self.landmark[9].x - self.landmark[0].x,
+                             self.landmark[9].y - self.landmark[0].y] * np.array([640, 480])
+        palm_vec_horizontal = [self.landmark[5].x - self.landmark[17].x,
+                               self.landmark[5].y - self.landmark[17].y] * np.array([640, 480])
+        print(length(palm_vec_vertical) / length(palm_vec_horizontal))
+        return not 1 < length(palm_vec_vertical) / length(palm_vec_horizontal) < 3
+
+    def is_facing_camera(self):
+        return self.landmark[5].x < self.landmark[17].x
+
     def is_extended(self, finger):
         palm_vec = [self.landmark[9].x - self.landmark[0].x,
                     self.landmark[9].y - self.landmark[0].y]
+        palm_vec_horizontal = [self.landmark[5].x - self.landmark[13].x,
+                               self.landmark[5].y - self.landmark[13].y]
+
         if finger is HandRegion.THUMB:
-            # thumb_vec = [self.landmark[4].x - self.landmark[2].x,
-            #              self.landmark[4].y - self.landmark[2].y]
-            intersection_pnt = get_intersect([self.landmark[3].x, self.landmark[3].y],
-                                             [self.landmark[2].x, self.landmark[2].y],
-                                             [self.landmark[0].x, self.landmark[0].y],
-                                             [self.landmark[9].x, self.landmark[9].y])
-            helper_vec = [intersection_pnt[0] - self.landmark[0].x,
-                          intersection_pnt[1] - self.landmark[0].y]
-            return dot(palm_vec, helper_vec) < 0
+            thumb_vec = [self.landmark[3].x - self.landmark[2].x,
+                         self.landmark[3].y - self.landmark[2].y]
+            return dot(palm_vec_horizontal, thumb_vec) > 0
+
+            # intersection_pnt = get_intersect([self.landmark[3].x, self.qlandmark[3].y],
+            #                                  [self.landmark[2].x, self.landmark[2].y],
+            #                                  [self.landmark[0].x, self.landmark[0].y],
+            #                                  [self.landmark[9].x, self.landmark[9].y])
+            # helper_vec = [intersection_pnt[0] - self.landmark[0].x,
+            #               intersection_pnt[1] - self.landmark[0].y]
+            # return dot(palm_vec, helper_vec) < 0
         elif finger is HandRegion.INDEX:
             index_vec = [self.landmark[8].x - self.landmark[6].x,
                          self.landmark[8].y - self.landmark[6].y]
@@ -89,12 +106,19 @@ class Hand:
                      self.landmark[20].y - self.landmark[18].y] * dims
         pinky_pnt = [self.landmark[18].x, self.landmark[18].y] * dims
 
+        palm_vec_vertical = [self.landmark[9].x - self.landmark[0].x,
+                             self.landmark[9].y - self.landmark[0].y] * dims
+        palm_vec_horizontal = [self.landmark[5].x - self.landmark[17].x,
+                               self.landmark[5].y - self.landmark[17].y] * dims
+
         draw_arrow(hand_vec, hand_pnt)
         draw_arrow(thumb_vec, thumb_pnt)
         draw_arrow(index_vec, index_pnt)
         draw_arrow(middle_vec, middle_pnt)
         draw_arrow(ring_vec, ring_pnt)
         draw_arrow(pinky_vec, pinky_pnt)
+        draw_arrow(palm_vec_horizontal, [0.5, 0.5] * dims)
+        draw_arrow(palm_vec_vertical, [0.5, 0.5] * dims)
 
     def points_towards(self, hand_region, direction):
         region_vec = self._get_region_vec(hand_region, True)
@@ -179,6 +203,10 @@ def get_intersect(a1, a2, b1, b2):
     if z == 0:  # lines are parallel
         return (float('inf'), float('inf'))
     return (x / z, y / z)
+
+
+def length(vec):
+    return math.sqrt(sum([x * x for x in vec]))
 
 
 class HandRegion(Enum):
