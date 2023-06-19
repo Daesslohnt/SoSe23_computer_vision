@@ -10,7 +10,7 @@ from Camera.Filter.blur_filter import BlurFilter
 from Camera.Filter.flip_filter import FlipFilter
 from Camera.webcam import Webcam
 from HandRecognition.gesture import Gesture
-from HandRecognition.hand import HandRegion, Hand, Direction
+from HandRecognition.hand_2 import HandRegion, Hand, Direction
 from Helper.time_controller import TimeController
 
 mp_drawing = mp.solutions.drawing_utils
@@ -113,14 +113,20 @@ if __name__ == "__main__":
 
     # For webcam input:
     camera = Webcam()
-    camera.add_pipeline("flipped", [FlipFilter(), BlurFilter()])
+    camera.add_pipeline("flipped", [FlipFilter()]) # , BlurFilter()])
 
     with mp_hands.Hands(
             model_complexity=1,
-            min_detection_confidence=0.8,
-            min_tracking_confidence=0.8,
+            min_detection_confidence=0.5,
+            min_tracking_confidence=0.5,
             max_num_hands=2) as hands:
+
+        time2 = 0
         while True:
+            time1 = time.perf_counter()
+            print(time1 - time2)
+            time2 = time1
+
             image = camera.get_image("flipped")
 
             # To improve performance, optionally mark the image as not writeable to
@@ -135,98 +141,97 @@ if __name__ == "__main__":
 
                 # Gesture recognition and mouse input
                 for index, classi in enumerate(results.multi_handedness):
-                    hand = Hand(results.multi_hand_landmarks[index].landmark, classi.classification[0].label)
-                    hand.draw_vecs(image, np.array([camera.width, camera.height]))
+                    if classi.classification[0].label == "Right":
+                        hand = Hand(results.multi_hand_landmarks[index].landmark, classi.classification[0].label)
+                        hand.draw_vecs(image, np.array([camera.width, camera.height]))
 
-                    tp = 0.9
+                        hand.test()
 
-                    if move_gesture.is_gesture(hand):
-                        # Calculate average position of hand
-                        x = (hand.landmark[0].x + hand.landmark[5].x + hand.landmark[9].x + hand.landmark[13].x +
-                             hand.landmark[17].x) / 5
-                        y = (hand.landmark[0].y + hand.landmark[5].y + hand.landmark[9].y + hand.landmark[13].y +
-                             hand.landmark[17].y) / 5
-                        avg_position = [int(x * 640), int(y * 480)]
+                        tp = 0.8
 
-                        image = cv2.circle(img=image, center=avg_position, radius=20, color=(255, 0, 0), thickness=3)
+                        if hand.is_move() or hand.is_left_button():
+                            # Calculate average position of hand
+                            x = (hand.landmark[0].x + hand.landmark[5].x + hand.landmark[9].x + hand.landmark[13].x +
+                                 hand.landmark[17].x) / 5
+                            y = (hand.landmark[0].y + hand.landmark[5].y + hand.landmark[9].y + hand.landmark[13].y +
+                                 hand.landmark[17].y) / 5
+                            avg_position = [int(x * 640), int(y * 480)]
 
-                        # mouse movement
-                        x *= 640
-                        y *= 480
+                            image = cv2.circle(img=image, center=avg_position, radius=20, color=(255, 0, 0), thickness=3)
 
-                        if movement_timer.is_new_activation():
+                            # mouse movement
+                            x *= 640
+                            y *= 480
+
+                            if movement_timer.is_new_activation():
+                                old_pos = (x, y)
+
+                            fact = 2
+                            movement = (movement[0] * (1 - tp) + (x - old_pos[0]) * tp) * fact, (movement[1] * (1 - tp) + (y - old_pos[1]) * tp) * fact
                             old_pos = (x, y)
+                            mouse.move(movement[0] + 0.5, movement[1] + 0.5)
 
-                        fact = 2
-                        movement = (movement[0] * (1 - tp) + (x - old_pos[0]) * tp) * fact, \
-                                   (movement[1] * (1 - tp) + (y - old_pos[1]) * tp) * fact
-                        old_pos = (x, y)
+                        # Scroll movement
+                        if hand.is_scroll_down():
+                            if scroll_down_timeout == 1.2 or scroll_down_timeout <= 0:
+                                scroll_timer_down.activate()
+                                print("down")
+                                mouse.scroll(0, -1)
+                            scroll_down_timeout -= scroll_timer_down.activate()
+                        else:
+                            scroll_down_timeout = 1.2
 
-                        mouse.move(movement[0], movement[1])
+                        if hand.is_scroll_up():
+                            if scroll_up_timeout == 0.8 or scroll_up_timeout <= 0:
+                                scroll_timer_up.activate()
+                                mouse.scroll(0, 1)
+                                print("up")
+                            scroll_up_timeout -= scroll_timer_up.activate()
+                        else:
+                            scroll_up_timeout = 0.8
 
-                    # Scroll movement
-                    if scroll_down_gesture.is_gesture(hand):
-                        if scroll_down_timeout == 0.5 or scroll_down_timeout <= 0:
-                            scroll_timer_down.activate()
-                            print("down")
-                            mouse.scroll(0, -1)
-                        scroll_down_timeout -= scroll_timer_down.activate()
-                    else:
-                        scroll_down_timeout = 0.5
+                        # mouse button left
+                        if hand.is_left_button():
+                            if not lmb_pressed:
+                                mouse.press(Button.left)
+                                lmb_pressed = True
+                        else:
+                            if lmb_pressed:
+                                mouse.release(Button.left)
+                                lmb_pressed = False
 
-                    if scrool_up_gesture.is_gesture(hand):
-                        if scroll_up_timeout == 0.5 or scroll_up_timeout <= 0:
-                            scroll_timer_up.activate()
-                            mouse.scroll(0, 1)
-                            print("up")
-                        scroll_up_timeout -= scroll_timer_up.activate()
-                    else:
-                        scroll_up_timeout = 0.5
-
-                    # mouse button left
-                    if lmb_gesture.is_gesture(hand):
-                        if not lmb_pressed:
-                            mouse.press(Button.left)
-                            print("lmb")
-                            # lmb_pressed = True
-                    else:
                         if lmb_pressed:
-                            mouse.release(Button.left)
-                            lmb_pressed = False
+                            print("lmb")
 
-                    # mouse button right
-                    if rmb_gesture.is_gesture(hand):
-                        if not rmb_pressed:
-                            print("rmb")
-                            mouse.press(Button.right)
-                            # rmb_pressed = True
-                    else:
+                        # mouse button right
+                        if hand.is_right_button():
+                            if not rmb_pressed:
+                                mouse.press(Button.right)
+                                rmb_pressed = True
+                        else:
+                            if rmb_pressed:
+                                mouse.release(Button.right)
+                                rmb_pressed = False
+
                         if rmb_pressed:
-                            mouse.release(Button.right)
-                            rmb_pressed = False
+                            print("rmb")
 
-                    # mouse button middle
-                    # if mmb_gesture.is_gesture(hand):
-                    #     if not mmb_pressed:
-                    #         mouse.press(Button.middle)
-                    #         mmb_pressed = True
-                    # else:
-                    #     if mmb_pressed:
-                    #         mouse.release(Button.middle)
-                    #         mmb_pressed = False
 
-                    # double klicks
-                    if double_lmb_gesture.is_gesture(hand):
-                        if not double_lmb_pressed:
-                            print("double_lmb")
-                            mouse.click(Button.left, 2)
-                            double_lmb_pressed = True
-                    else:
-                        if double_lmb_pressed:
-                            double_lmb_pressed = False
+                        # double klicks
+                        if hand.is_double_click():
+                            if not double_lmb_pressed:
+                                print("double_lmb")
+                                mouse.click(Button.left, 2)
+                                double_lmb_pressed = True
+                        else:
+                            if double_lmb_pressed:
+                                double_lmb_pressed = False
 
-                # Draw bones on image
-                draw_bones(results, image)
+
+                    # Draw bones on image
+                    # draw_bones(results, image)
+
+
 
             # Display image and check for exit (esc or 'q').
             cv2.imshow('MediaPipe Hands', image)
