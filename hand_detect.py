@@ -34,15 +34,21 @@ def draw_bones(results, image):
             mp_drawing_styles.get_default_hand_connections_style()
         )
 
-async def do_gesture_action(hand, mouse_controller):
+async def do_gesture_action(hand, mouse_controller, gesture_sequence):
     predictions = model(hand.normalize_landmarks())[0].numpy()
     gesture_class = Gesture.define_gesture_class(predictions)
-    print(gesture_class)
-    mouse_controller.gesture_action(gesture_class)
+    gesture_sequence.append(gesture_class)
+    if len(gesture_sequence) == 3:
+        most_often = max(set(gesture_sequence), key=gesture_sequence.count)
+        print(most_often)
+        mouse_controller.gesture_action(most_often)
+        gesture_sequence = []
+    return gesture_sequence
 
 async def main():
     # mouse = mouse.Controller()
     mouse_controller = MouseController()
+    gesture_sequence = []
 
     old_pos = (0, 0)
     movement = (0, 0)
@@ -85,7 +91,7 @@ async def main():
                 # Gesture recognition and mouse input
                 for index, classi in enumerate(results.multi_handedness):
                     hand = Hand(results.multi_hand_landmarks[index].landmark, classi.classification[0].label)
-                    task = asyncio.create_task(do_gesture_action(hand, mouse_controller))
+                    task = asyncio.create_task(do_gesture_action(hand, mouse_controller, gesture_sequence))
                     hand.draw_vecs(image, np.array([camera.width, camera.height]))
 
                     tp = 0.9
@@ -114,7 +120,7 @@ async def main():
 
                         mouse_controller.move_cursor(movement)
 
-                    await task
+                    gesture_sequence = await task
 
                 # Draw bones on image
                 draw_bones(results, image)

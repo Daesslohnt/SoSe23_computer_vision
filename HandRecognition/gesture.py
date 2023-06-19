@@ -15,6 +15,10 @@ class Gesture:
     @staticmethod
     def define_gesture_class(predictions):
         most_possible = argmax(predictions[0])
+        if predictions[0][most_possible] < 0.9 and most_possible != 0:
+            most_possible = 7
+        if most_possible == 0 and predictions[0][most_possible] < 0.6:
+            most_possible = 7
         if most_possible == 0:
             return GestureClass.LEFT_CLICK
         elif most_possible == 1:
