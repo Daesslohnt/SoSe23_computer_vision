@@ -56,6 +56,9 @@ with mp_hands.Hands(
                     prediction = model.predict(landmarks, verbose=0)
 
                     index = np.argmax(prediction[0])
+                    if prediction[0][index] < 0.8 and index != 0:
+                        index = 7
+
                     print('-'*30)
                     if index == 0:
                         print("left_click")

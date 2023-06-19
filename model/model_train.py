@@ -1,4 +1,5 @@
 import keras as k
+from keras.metrics import Recall
 import numpy as np
 import os
 from sklearn.model_selection import train_test_split
@@ -18,12 +19,12 @@ def make_model(input_shape):
 
     # TODO: try different architectures
     conv = k.layers.Conv2D(32, 3, activation='relu', padding="same")(input_layer)
-   # conv = k.layers.Conv2D(64, 3, activation='relu', padding="same")(conv)
+    conv = k.layers.Conv2D(64, 3, activation='relu', padding="same")(conv)
     conv = k.layers.Flatten()(conv)
     fc = k.layers.Dense(128, activation="relu")(conv)
-   # fc = k.layers.Dense(64, activation="tanh")(fc)
-   # fc = k.layers.Dense(32, activation="sigmoid")(fc)
-   # fc = k.layers.Dense(16, activation="tanh")(fc)
+    fc = k.layers.Dense(64, activation="tanh")(fc)
+    fc = k.layers.Dense(32, activation="sigmoid")(fc)
+    fc = k.layers.Dense(16, activation="tanh")(fc)
 
     output_layer = k.layers.Dense(8, activation="softmax")(fc)
 
@@ -35,7 +36,7 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, shuffle=True)
 model.compile(
     optimizer="adam",
     loss=k.losses.CategoricalCrossentropy(),
-    metrics=["Recall", "categorical_accuracy"]
+    metrics=[Recall(thresholds=0.6), "categorical_accuracy"]
 )
 
 callbacks = [
@@ -60,10 +61,14 @@ history = model.fit(
     callbacks=callbacks
 )
 
+model = k.models.load_model("best_model.h5")
+model.evaluate(X_test, y_test)
 preds = model.predict(X_test)
 
 for i in range(len(preds)):
     max_index = np.argmax(preds[i])
+    if preds[i][max_index] < 0.6:
+        max_index = 7
     for j in range(8):
         preds[i][j] = 1 if j == max_index else 0
 
