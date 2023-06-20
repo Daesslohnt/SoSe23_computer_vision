@@ -1,6 +1,6 @@
-from keras.models import load_model
 import tensorflow as tf
 from tensorflow.python.framework.convert_to_constants import convert_variables_to_constants_v2
+
 
 # model = load_model("best_model.h5")
 
@@ -14,12 +14,12 @@ def freeze_graph(model):
     frozen_func = convert_variables_to_constants_v2(full_model)
     frozen_func.graph.as_graph_def()
 
-
     # Save frozen graph from frozen ConcreteFunction to hard drive
     tf.io.write_graph(graph_or_graph_def=frozen_func.graph,
                       logdir="./frozen_models",
                       name="frozen_graph.pb",
                       as_text=False)
+
 
 def wrap_frozen_graph(graph_def, inputs, outputs, print_graph=False):
     def _imports_graph_def():

@@ -1,6 +1,7 @@
-import numpy as np
 import os
 import re
+
+import numpy as np
 
 DIR = os.path.join("..", "daten")
 

@@ -1,7 +1,8 @@
-from pynput.mouse import Button
 from pynput import mouse
+from pynput.mouse import Button
 
 from HandRecognition.gesture import GestureClass
+
 
 class MouseController:
 

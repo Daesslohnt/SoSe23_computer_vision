@@ -1,19 +1,16 @@
+import asyncio
+
 import cv2
 import mediapipe as mp
 import numpy as np
-from pynput import mouse
-from pynput.mouse import Button
-from keras.models import load_model
-from os.path import join
-import asyncio
 
 from Camera.Filter.blur_filter import BlurFilter
 from Camera.Filter.flip_filter import FlipFilter
 from Camera.webcam import Webcam
-from HandRecognition.gesture import Gesture, GestureClass
-from HandRecognition.hand import HandRegion, Hand, Direction
-from Helper.time_controller import TimeController
+from HandRecognition.gesture import Gesture
+from HandRecognition.hand import HandRegion, Hand
 from Helper.mouse_controller import MouseController
+from Helper.time_controller import TimeController
 from model.freeze_graph import load_frozen_graph
 
 mp_drawing = mp.solutions.drawing_utils
@@ -34,6 +31,7 @@ def draw_bones(results, image):
             mp_drawing_styles.get_default_hand_connections_style()
         )
 
+
 async def do_gesture_action(hand, mouse_controller, gesture_sequence):
     predictions = model(hand.normalize_landmarks())[0].numpy()
     gesture_class = Gesture.define_gesture_class(predictions)
@@ -44,6 +42,7 @@ async def do_gesture_action(hand, mouse_controller, gesture_sequence):
         mouse_controller.gesture_action(most_often)
         gesture_sequence = []
     return gesture_sequence
+
 
 async def main():
     # mouse = mouse.Controller()
@@ -64,7 +63,6 @@ async def main():
                             lambda hand: hand.is_extended(HandRegion.RING),
                             lambda hand: hand.is_extended(HandRegion.PINKY)
                             ])
-
 
     # For webcam input:
     camera = Webcam()
@@ -133,6 +131,7 @@ async def main():
                 break
     del mouse_controller
     camera.release()
+
 
 if __name__ == '__main__':
     asyncio.run(main())

@@ -1,5 +1,7 @@
 from enum import Enum
+
 from numpy import argmax
+
 
 class Gesture:
 
@@ -35,6 +37,7 @@ class Gesture:
             return GestureClass.HOLD_ON
         else:
             return GestureClass.DEFAULT
+
 
 class GestureClass(Enum):
     LEFT_CLICK = 0,

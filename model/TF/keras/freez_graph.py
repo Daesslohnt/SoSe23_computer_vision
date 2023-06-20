@@ -1,5 +1,6 @@
 import tensorflow as tf
 
+
 def freeze_graph(model_dir, output_node_names):
     """Extract the sub graph defined by the output nodes and convert
     all its variables into constant
@@ -50,4 +51,5 @@ def freeze_graph(model_dir, output_node_names):
 
     return output_graph_def
 
-freeze_graph('..\\keras',"output_node\\Softmax")
+
+freeze_graph('..\\keras', "output_node\\Softmax")

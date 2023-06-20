@@ -1,7 +1,8 @@
 import math
+import os
 import random
 from time import sleep
-import os
+
 import cv2
 
 from Camera.webcam import Webcam
@@ -18,9 +19,10 @@ def phototool(save_path='./', photo_amount=10, before_photo_timer=5, between_pho
         image = cam.get_image()
         cv2.imwrite(save_path + name, image)
 
-        print(photo_amount-photo_nr)
+        print(photo_amount - photo_nr)
         sleep(between_photo_timer)
     print("finished:", tag)
+
 
 DIR = os.path.join("..", "daten")
 
