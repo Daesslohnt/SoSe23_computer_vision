@@ -173,22 +173,22 @@ if __name__ == "__main__":
 
                         # Scroll movement
                         if hand.is_scroll_down():
-                            if scroll_down_timeout == 1.2 or scroll_down_timeout <= 0:
+                            if scroll_down_timeout == 0.5 or scroll_down_timeout <= 0:
                                 scroll_timer_down.activate()
                                 print("down")
                                 mouse.scroll(0, -1)
                             scroll_down_timeout -= scroll_timer_down.activate()
                         else:
-                            scroll_down_timeout = 1.2
+                            scroll_down_timeout = 0.5
 
                         if hand.is_scroll_up():
-                            if scroll_up_timeout == 0.8 or scroll_up_timeout <= 0:
+                            if scroll_up_timeout == 0.5 or scroll_up_timeout <= 0:
                                 scroll_timer_up.activate()
                                 mouse.scroll(0, 1)
                                 print("up")
                             scroll_up_timeout -= scroll_timer_up.activate()
                         else:
-                            scroll_up_timeout = 0.8
+                            scroll_up_timeout = 0.5
 
                         # mouse button left
                         if hand.is_left_button():
