@@ -1,10 +1,10 @@
-import keras as k
-import numpy as np
 import os
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import recall_score
-import matplotlib.pyplot as plt
 
+import keras as k
+import matplotlib.pyplot as plt
+import numpy as np
+from sklearn.metrics import recall_score
+from sklearn.model_selection import train_test_split
 
 X = np.load(os.path.join("..", "daten", "X.npy"))
 y = np.load(os.path.join("..", "daten", "y.npy"))
@@ -28,6 +28,7 @@ def make_model(input_shape):
     output_layer = k.layers.Dense(8, activation="softmax")(fc)
 
     return k.models.Model(inputs=input_layer, outputs=output_layer)
+
 
 model = make_model(X.shape[1:])
 
@@ -66,7 +67,6 @@ for i in range(len(preds)):
     max_index = np.argmax(preds[i])
     for j in range(8):
         preds[i][j] = 1 if j == max_index else 0
-
 
 p_left, p_double, p_right, p_up, p_down, p_wheel, p_hold, p_default = np.array(preds).T
 t_left, t_double, t_right, t_up, t_down, t_wheel, t_hold, t_default = y_test.T

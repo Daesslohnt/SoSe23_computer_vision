@@ -1,7 +1,8 @@
+import os
+
+import cv2
 import mediapipe as mp
 import numpy as np
-import os
-import cv2
 
 """
     For each gesture it's own directory:
@@ -55,9 +56,7 @@ with mp_hands.Hands(
         min_detection_confidence=0.8,
         min_tracking_confidence=0.8,
         max_num_hands=2) as hands:
-
     for label, files in all_files.items():
-
 
         for file in files:
             image = cv2.imread(file, cv2.IMREAD_COLOR)
@@ -77,7 +76,7 @@ with mp_hands.Hands(
 
                     X.append(landmarks)
 
-                    label_code = [0]*8
+                    label_code = [0] * 8
                     if label == "left_click":
                         label_code[0] = 1
                     elif label == "double_click":

@@ -1,8 +1,9 @@
-import keras as k
-import numpy as np
-import mediapipe as mp
-import cv2
 import os
+
+import cv2
+import keras as k
+import mediapipe as mp
+import numpy as np
 
 from Camera.Filter.blur_filter import BlurFilter
 from Camera.Filter.flip_filter import FlipFilter
@@ -39,7 +40,6 @@ with mp_hands.Hands(
                     landmarks = results.multi_hand_landmarks[index].landmark
                     landmarks = np.array([[lm.x, lm.y] for lm in landmarks])
 
-
                     # normalization
                     item = landmarks.T
                     x, y = item
@@ -56,7 +56,7 @@ with mp_hands.Hands(
                     prediction = model.predict(landmarks, verbose=0)
 
                     index = np.argmax(prediction[0])
-                    print('-'*30)
+                    print('-' * 30)
                     print(np.max(prediction[0]))
                     if index == 0:
                         print("left_click")

@@ -1,7 +1,8 @@
 import math
+import os
 import random
 from time import sleep
-import os
+
 import cv2
 
 from Camera.webcam import Webcam
@@ -18,19 +19,20 @@ def phototool(save_path='./', photo_amount=10, before_photo_timer=5, between_pho
         image = cam.get_image()
         cv2.imwrite(save_path + name, image)
 
-        print(photo_amount-photo_nr)
+        print(photo_amount - photo_nr)
         sleep(between_photo_timer)
     print("finished:", tag)
 
+
 DIR = os.path.join("..", "daten")
 
-phototool(save_path=os.path.join(DIR, "left_click"), photo_amount=50, tag="left_click")
-phototool(save_path=os.path.join(DIR, "double_click"), photo_amount=50, tag="double_click")
-phototool(save_path=os.path.join(DIR, "right_click"), photo_amount=50, tag="right_click")
-phototool(save_path=os.path.join(DIR, "scroll_up"), photo_amount=50, tag="scroll_up")
-phototool(save_path=os.path.join(DIR, "scroll_down"), photo_amount=50, tag="scroll_down")
-phototool(save_path=os.path.join(DIR, "hold_on"), photo_amount=50, tag="hold_on")
-phototool(save_path=os.path.join(DIR, "default"), photo_amount=50, tag="default")
+phototool(save_path=os.path.join(DIR, "left_click"), photo_amount=5, tag="left_click")
+phototool(save_path=os.path.join(DIR, "double_click"), photo_amount=5, tag="double_click")
+phototool(save_path=os.path.join(DIR, "right_click"), photo_amount=5, tag="right_click")
+phototool(save_path=os.path.join(DIR, "scroll_up"), photo_amount=5, tag="scroll_up")
+phototool(save_path=os.path.join(DIR, "scroll_down"), photo_amount=5, tag="scroll_down")
+phototool(save_path=os.path.join(DIR, "hold_on"), photo_amount=5, tag="hold_on")
+phototool(save_path=os.path.join(DIR, "default"), photo_amount=5, tag="default")
 
 '''
 left_click - Daumen

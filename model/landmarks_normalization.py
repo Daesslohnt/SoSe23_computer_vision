@@ -1,5 +1,6 @@
-import numpy as np
 import os
+
+import numpy as np
 
 path = os.path.join("..", "daten", "X.npy")
 X = np.load(path)

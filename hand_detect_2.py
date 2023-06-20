@@ -6,7 +6,6 @@ import numpy as np
 from pynput import mouse
 from pynput.mouse import Button
 
-from Camera.Filter.blur_filter import BlurFilter
 from Camera.Filter.flip_filter import FlipFilter
 from Camera.webcam import Webcam
 from HandRecognition.gesture import Gesture
@@ -54,9 +53,9 @@ if __name__ == "__main__":
     move_gesture = Gesture([lambda hand: hand.handedness == 'Right',
                             lambda hand: not hand.is_twisted(),
                             lambda hand: hand.is_facing_camera(),
-                            #lambda hand: hand.is_extended(HandRegion.THUMB),
+                            # lambda hand: hand.is_extended(HandRegion.THUMB),
                             lambda hand: hand.is_extended(HandRegion.INDEX),
-                            #lambda hand: hand.is_extended(HandRegion.MIDDLE),
+                            # lambda hand: hand.is_extended(HandRegion.MIDDLE),
                             lambda hand: hand.is_extended(HandRegion.RING),
                             lambda hand: hand.is_extended(HandRegion.PINKY)
                             ])
@@ -113,7 +112,7 @@ if __name__ == "__main__":
 
     # For webcam input:
     camera = Webcam()
-    camera.add_pipeline("flipped", [FlipFilter()]) # , BlurFilter()])
+    camera.add_pipeline("flipped", [FlipFilter()])  # , BlurFilter()])
 
     with mp_hands.Hands(
             model_complexity=1,
@@ -157,7 +156,8 @@ if __name__ == "__main__":
                                  hand.landmark[17].y) / 5
                             avg_position = [int(x * 640), int(y * 480)]
 
-                            image = cv2.circle(img=image, center=avg_position, radius=20, color=(255, 0, 0), thickness=3)
+                            image = cv2.circle(img=image, center=avg_position, radius=20, color=(255, 0, 0),
+                                               thickness=3)
 
                             # mouse movement
                             x *= 640
@@ -167,7 +167,8 @@ if __name__ == "__main__":
                                 old_pos = (x, y)
 
                             fact = 2
-                            movement = (movement[0] * (1 - tp) + (x - old_pos[0]) * tp) * fact, (movement[1] * (1 - tp) + (y - old_pos[1]) * tp) * fact
+                            movement = (movement[0] * (1 - tp) + (x - old_pos[0]) * tp) * fact, (
+                                        movement[1] * (1 - tp) + (y - old_pos[1]) * tp) * fact
                             old_pos = (x, y)
                             mouse.move(movement[0] + 0.5, movement[1] + 0.5)
 
@@ -216,7 +217,6 @@ if __name__ == "__main__":
                         if rmb_pressed:
                             print("rmb")
 
-
                         # double klicks
                         if hand.is_double_click():
                             if not double_lmb_pressed:
@@ -227,11 +227,8 @@ if __name__ == "__main__":
                             if double_lmb_pressed:
                                 double_lmb_pressed = False
 
-
                     # Draw bones on image
                     # draw_bones(results, image)
-
-
 
             # Display image and check for exit (esc or 'q').
             cv2.imshow('MediaPipe Hands', image)

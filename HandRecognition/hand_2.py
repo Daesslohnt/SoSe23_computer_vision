@@ -2,7 +2,6 @@ import math
 from enum import Enum
 
 import cv2
-import numpy
 import numpy as np
 
 from Helper.rectangle import Rectangle
@@ -21,13 +20,15 @@ class Vect:
         self.y = self.y / self.len
 
     def draw(self, image, dims=[640, 480], col=(255, 255, 255)):
-        cv2.arrowedLine(image, [int(self.start[0] * dims[0]), int(self.start[1] * dims[1])], [int(self.tip[0] * dims[0]), int(self.tip[1] * dims[1])], col, thickness=2, tipLength=0.2)
+        cv2.arrowedLine(image, [int(self.start[0] * dims[0]), int(self.start[1] * dims[1])],
+                        [int(self.tip[0] * dims[0]), int(self.tip[1] * dims[1])], col, thickness=2, tipLength=0.2)
 
     def veclen(self, vec):
         return np.sqrt(np.square(vec[0]) + np.square(vec[1]))
 
     def __str__(self):
-        return "x=" + str(round(self.x, 3)) + "  y=" + str(round(self.y, 3)) + "  len=" + str(round(self.len, 3)) + "  dir=" + str(round(self.dir, 3)) + "°"
+        return "x=" + str(round(self.x, 3)) + "  y=" + str(round(self.y, 3)) + "  len=" + str(
+            round(self.len, 3)) + "  dir=" + str(round(self.dir, 3)) + "°"
 
 
 class Hand:
@@ -35,23 +36,33 @@ class Hand:
     def __init__(self, landmark, handedness):
         self.landmark = landmark
         self.handedness = handedness
-        self.vec_palm_vertical = Vect([self.landmark[9].x, self.landmark[9].y], [self.landmark[0].x, self.landmark[0].y])
-        self.vec_palm_horizontal = Vect([self.landmark[5].x, self.landmark[5].y], [self.landmark[17].x, self.landmark[17].y])
+        self.vec_palm_vertical = Vect([self.landmark[9].x, self.landmark[9].y],
+                                      [self.landmark[0].x, self.landmark[0].y])
+        self.vec_palm_horizontal = Vect([self.landmark[5].x, self.landmark[5].y],
+                                        [self.landmark[17].x, self.landmark[17].y])
         self.vec_thumb_start = Vect([self.landmark[2].x, self.landmark[2].y], [self.landmark[1].x, self.landmark[1].y])
         self.vec_thumb_middle = Vect([self.landmark[3].x, self.landmark[3].y], [self.landmark[2].x, self.landmark[2].y])
         self.vec_thumb_tip = Vect([self.landmark[4].x, self.landmark[4].y], [self.landmark[3].x, self.landmark[3].y])
         self.vec_index_start = Vect([self.landmark[6].x, self.landmark[6].y], [self.landmark[5].x, self.landmark[5].y])
         self.vec_index_middle = Vect([self.landmark[7].x, self.landmark[7].y], [self.landmark[6].x, self.landmark[6].y])
         self.vec_index_tip = Vect([self.landmark[8].x, self.landmark[8].y], [self.landmark[7].x, self.landmark[7].y])
-        self.vec_middle_start = Vect([self.landmark[10].x, self.landmark[10].y], [self.landmark[9].x, self.landmark[9].y])
-        self.vec_middle_middle = Vect([self.landmark[11].x, self.landmark[11].y], [self.landmark[10].x, self.landmark[10].y])
-        self.vec_middle_tip = Vect([self.landmark[12].x, self.landmark[12].y], [self.landmark[11].x, self.landmark[11].y])
-        self.vec_ring_start = Vect([self.landmark[14].x, self.landmark[14].y], [self.landmark[13].x, self.landmark[13].y])
-        self.vec_ring_middle = Vect([self.landmark[15].x, self.landmark[15].y], [self.landmark[14].x, self.landmark[14].y])
+        self.vec_middle_start = Vect([self.landmark[10].x, self.landmark[10].y],
+                                     [self.landmark[9].x, self.landmark[9].y])
+        self.vec_middle_middle = Vect([self.landmark[11].x, self.landmark[11].y],
+                                      [self.landmark[10].x, self.landmark[10].y])
+        self.vec_middle_tip = Vect([self.landmark[12].x, self.landmark[12].y],
+                                   [self.landmark[11].x, self.landmark[11].y])
+        self.vec_ring_start = Vect([self.landmark[14].x, self.landmark[14].y],
+                                   [self.landmark[13].x, self.landmark[13].y])
+        self.vec_ring_middle = Vect([self.landmark[15].x, self.landmark[15].y],
+                                    [self.landmark[14].x, self.landmark[14].y])
         self.vec_ring_tip = Vect([self.landmark[16].x, self.landmark[16].y], [self.landmark[15].x, self.landmark[15].y])
-        self.vec_pinky_start = Vect([self.landmark[18].x, self.landmark[18].y], [self.landmark[17].x, self.landmark[17].y])
-        self.vec_pinky_middle = Vect([self.landmark[19].x, self.landmark[19].y], [self.landmark[18].x, self.landmark[18].y])
-        self.vec_pinky_tip = Vect([self.landmark[20].x, self.landmark[20].y], [self.landmark[19].x, self.landmark[19].y])
+        self.vec_pinky_start = Vect([self.landmark[18].x, self.landmark[18].y],
+                                    [self.landmark[17].x, self.landmark[17].y])
+        self.vec_pinky_middle = Vect([self.landmark[19].x, self.landmark[19].y],
+                                     [self.landmark[18].x, self.landmark[18].y])
+        self.vec_pinky_tip = Vect([self.landmark[20].x, self.landmark[20].y],
+                                  [self.landmark[19].x, self.landmark[19].y])
 
     def is_move(self):
         return self.is_flat() and self.is_thumb_straight() and self.is_index_straight() and self.is_middle_straight() and self.is_ring_straight()
@@ -83,10 +94,12 @@ class Hand:
         return 45 > self.vec_palm_vertical.dir > -45 \
             and 1.0 < (self.vec_palm_vertical.len / self.vec_palm_horizontal.len) < 2.5 \
             and -50 > self.diffangle(self.vec_palm_horizontal.dir, self.vec_palm_vertical.dir) > -100
+
     def is_back_down(self):
         return abs(self.vec_palm_vertical.dir) > 100 \
             and 1.0 < (self.vec_palm_vertical.len / self.vec_palm_horizontal.len) < 5.5 \
             and -50 > self.diffangle(self.vec_palm_horizontal.dir, self.vec_palm_vertical.dir) > -100
+
     def is_thumb_straight(self):
         return 90 > self.diffangle(self.vec_thumb_start.dir, self.vec_palm_vertical.dir) > 0 \
             and 90 > self.diffangle(self.vec_thumb_middle.dir, self.vec_palm_vertical.dir) > 0

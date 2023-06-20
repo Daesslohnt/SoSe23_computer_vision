@@ -2,7 +2,6 @@ import math
 from enum import Enum
 
 import cv2
-import numpy
 import numpy as np
 
 from Helper.rectangle import Rectangle

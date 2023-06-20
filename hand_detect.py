@@ -1,5 +1,3 @@
-import time
-
 import cv2
 import mediapipe as mp
 import numpy as np
@@ -54,9 +52,9 @@ if __name__ == "__main__":
     move_gesture = Gesture([lambda hand: hand.handedness == 'Right',
                             lambda hand: not hand.is_twisted(),
                             lambda hand: hand.is_facing_camera(),
-                            #lambda hand: hand.is_extended(HandRegion.THUMB),
+                            # lambda hand: hand.is_extended(HandRegion.THUMB),
                             lambda hand: hand.is_extended(HandRegion.INDEX),
-                            #lambda hand: hand.is_extended(HandRegion.MIDDLE),
+                            # lambda hand: hand.is_extended(HandRegion.MIDDLE),
                             lambda hand: hand.is_extended(HandRegion.RING),
                             lambda hand: hand.is_extended(HandRegion.PINKY)
                             ])
